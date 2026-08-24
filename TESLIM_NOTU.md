@@ -55,6 +55,9 @@
 - Dinamik kod çalıştırma ve ayrıcalı anahtar bulgusu: 0
 - Yayımlanmış, taslak ve zamanlanmış içerik sonuç ekranları: başarılı
 - Haber bağlantısı kopyalama ve ziyaretçi detay görünümü: başarılı
+- Editör sahiplik arayüzü: yalnızca kendi haberinde düzenle/sil; başka editörün haberinde yalnızca gör — başarılı
+- Admin sahiplik arayüzü: bütün haberlerde düzenle/sil — başarılı
+- Yeni sahiplik RLS sözleşmesi: admin geçişi, editör `created_by = auth.uid()` sınırı ve değişmez sahiplik alanı — başarılı statik doğrulama
 
 ## Canlı Supabase durumu
 
