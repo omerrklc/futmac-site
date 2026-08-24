@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://pwmwymvnyfvrumlizbuw.supabase.co wss://pwmwymvnyfvrumlizbuw.supabase.co; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"><meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="description" content="FUTMAC yönetici parolası yenileme ekranı.">
+  <title>Parola Yenile | FUTMAC</title>
+  <link rel="canonical" href="https://futmac.com.tr/sifre-yenile.html">
+  <link rel="icon" href="assets/images/logo/emac-turka-transparent.png">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <script src="assets/js/supabase-config.js" defer></script>
+  <script src="assets/js/supabase-service.js" defer></script>
+  <script src="assets/js/password-reset.js" defer></script>
+</head>
+<body class="admin-body">
+  <a class="skip-link" href="#reset-main">İçeriğe geç</a>
+  <div class="admin-shell">
+    <header class="admin-top"><img src="assets/images/logo/emac-turka-transparent.png" alt="E-Mac Turka arması"><div><h1>FUTMAC YÖNETİM PANELİ</h1><p>Güvenli parola yenileme</p></div></header>
+    <main id="reset-main">
+      <section class="admin-login" aria-labelledby="reset-title">
+        <h2 id="reset-title">Yeni parola belirle</h2>
+        <p>E-postanıza gelen bağlantıdan ulaştıysanız yeni parolanızı iki kez girin.</p>
+        <form class="admin-login-grid" data-password-reset-form>
+          <div class="admin-field"><label for="new-password">Yeni parola</label><input id="new-password" name="password" type="password" autocomplete="new-password" minlength="8" required><small>En az 8 karakter kullanın.</small></div>
+          <div class="admin-field"><label for="new-password-confirm">Yeni parola tekrar</label><input id="new-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" minlength="8" required></div>
+          <button class="admin-button" type="submit">PAROLAYI GÜNCELLE</button>
+          <p class="admin-message" data-password-reset-message aria-live="polite">Bağlantı doğrulanıyor…</p>
+        </form>
+        <p><a href="admin.html">Yönetici girişine dön</a></p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

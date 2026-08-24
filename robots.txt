@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /sifre-yenile.html
+Disallow: /haber-onizleme.html?preview=
+
+Sitemap: https://futmac.com.tr/sitemap.xml

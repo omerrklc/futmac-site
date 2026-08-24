@@ -1,0 +1,520 @@
+/* FUTMAC 2010 portali: sikisik, sert, kutulu ve icerik odakli. */
+:root {
+  --green:#075530; --dark:#111; --deep:#050505; --gold:#d7a42c;
+  --paper:#f5f4ee; --line:#a9aaa6; --ink:#171717; --muted:#5e625f;
+  --red:#b0080d; --red-dark:#750005; --blue:#174f86;
+  --sans:Tahoma,Verdana,Arial,sans-serif; --headline:Arial,Helvetica,sans-serif;
+}
+
+html { background:#dededb; }
+body {
+  color:#171717; font:11px/1.32 Tahoma,Verdana,Arial,sans-serif;
+  background-color:#dededb;
+  background-image:linear-gradient(rgba(255,255,255,.72),rgba(255,255,255,0) 170px),repeating-linear-gradient(0deg,rgba(0,0,0,.018) 0,rgba(0,0,0,.018) 1px,transparent 1px,transparent 3px);
+}
+a:hover { color:#a30007; text-decoration:underline; }
+.wrap { width:980px; max-width:calc(100% - 20px); }
+
+/* Ust bilgi ve gazete logosu */
+.top-strip {
+  height:24px; color:#555; background:linear-gradient(#fafafa,#d5d5d2);
+  border-top:1px solid #fff; border-bottom:1px solid #999; font-size:9px;
+  box-shadow:0 1px 3px rgba(0,0,0,.28);
+}
+.top-inner { height:23px; }
+.top-inner span:first-child { color:var(--red); font-weight:bold; }
+.header {
+  min-height:102px; padding:7px 14px;
+  background-color:#f8f7ef;
+  background-image:radial-gradient(circle at 76% 45%,rgba(8,82,45,.08),transparent 22%),repeating-linear-gradient(135deg,rgba(0,0,0,.02) 0,rgba(0,0,0,.02) 1px,transparent 1px,transparent 5px);
+  border:1px solid #aaa; border-top:0; box-shadow:0 2px 7px rgba(0,0,0,.28);
+}
+.brand { gap:10px; }
+.site-logo { width:86px; height:86px; }
+.wordmark {
+  color:#151515; font:900 50px/.76 "Arial Black",Arial,Helvetica,sans-serif;
+  letter-spacing:-4px; text-shadow:1px 1px 0 #fff,2px 2px 0 #bbb;
+}
+.wordmark strong { color:#9c0007; }
+.wordmark small {
+  margin-top:12px; color:#4e4e4e; font:700 10px/1.2 Tahoma,Verdana,sans-serif;
+  letter-spacing:.7px; text-shadow:none;
+}
+.header-meta {
+  min-width:148px; padding:8px 10px; color:#555; background:rgba(255,255,255,.58);
+  border:1px solid #bbb; box-shadow:inset 0 0 0 1px #fff; font-size:9px;
+}
+.header-meta strong { margin-bottom:4px; color:#920007; font-size:12px; }
+
+/* Iki katli 2010 spor portali menusu */
+.nav {
+  background:linear-gradient(#c81920 0,#9e0007 49%,#760005 51%,#8e0005 100%);
+  border:1px solid #620005; border-top-color:#e4686c; border-bottom:3px solid #111;
+  box-shadow:inset 0 1px rgba(255,255,255,.22),0 2px 4px rgba(0,0,0,.25);
+}
+.nav-inner { justify-content:flex-start; }
+.nav a {
+  padding:7px 13px 6px; color:#fff; border-right:1px solid #6c0004;
+  border-left:1px solid rgba(255,255,255,.13); font:bold 10px/1 Tahoma,Verdana,sans-serif;
+  text-shadow:0 -1px #550004;
+}
+.nav a:hover,.nav a:focus-visible,.nav a.active {
+  color:#fff; background:linear-gradient(#333,#050505); text-decoration:none;
+}
+.utility-nav { background:linear-gradient(#f7f7f7,#d8d8d5); border-bottom:1px solid #999; box-shadow:inset 0 1px #fff; }
+.utility-nav .wrap { display:flex; overflow-x:auto; }
+.utility-nav a {
+  flex:0 0 auto; padding:5px 11px; color:#2e2e2e; border-right:1px solid #b7b7b3;
+  font:bold 8px/1.1 Tahoma,Verdana,sans-serif;
+}
+.utility-nav a:hover { color:var(--red); background:#fff; text-decoration:none; }
+.breaking { height:28px; background:#fff; border:1px solid #999; border-top:0; box-shadow:0 1px 3px rgba(0,0,0,.16); }
+.breaking strong {
+  height:27px; padding:0 10px; background:linear-gradient(#d11a20,#8d0005);
+  font-size:9px; text-shadow:0 -1px #600;
+}
+.ticker { padding-inline:9px; gap:10px; animation:none; font-size:10px; }
+.ticker i { color:var(--red); }
+
+/* Ana sayfa ve haber kutulari */
+.page {
+  min-height:850px; padding:9px 10px 24px; background:#f5f4ee;
+  border:1px solid #aaa; border-top:0; box-shadow:0 4px 12px rgba(0,0,0,.22);
+}
+.section-title {
+  height:25px; margin:0 0 7px; padding-left:8px; background:linear-gradient(#646762,#333633);
+  border:1px solid #262826; border-top-color:#888; border-bottom-width:2px;
+  box-shadow:inset 0 1px rgba(255,255,255,.2);
+}
+.section-title:after { display:none; }
+.section-title h2 {
+  color:#fff; font:bold 10px/22px Tahoma,Verdana,sans-serif;
+  text-transform:uppercase; text-shadow:0 -1px #111;
+}
+.section-title--bar {
+  height:27px; padding-left:9px; background:linear-gradient(#225f94,#0f3962);
+  border-color:#082c51; border-top-color:#6f9bc2; border-radius:0;
+}
+.section-title--bar h2 { line-height:24px; }
+.hero-grid { grid-template-columns:minmax(0,2.15fr) minmax(250px,1fr); gap:8px; padding-bottom:9px; }
+.hero { padding-right:8px; }
+.story-image { border:1px solid #888; padding:3px; background:#fff; }
+.story-image--hero img { height:244px; }
+.story-image span {
+  left:4px; bottom:4px; padding:4px 7px; background:rgba(0,0,0,.85);
+  border-top:2px solid var(--red); font-size:8px;
+}
+.category { margin-top:6px; color:var(--red); font-size:8px; }
+.hero h1 { margin:2px 0 4px; color:#111; font-size:27px; line-height:1; letter-spacing:-1px; }
+.hero p { margin-bottom:5px; color:#484848; font-size:11px; line-height:1.35; }
+.read-more,.sidebar-link { color:#9c0007; font-size:9px; }
+.side-news {
+  padding:5px; color:#111; background:#e9e9e5; border:1px solid #999;
+  box-shadow:inset 0 0 0 1px #fff;
+}
+.small-news { gap:7px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dotted #888; }
+.small-news img { width:94px; height:64px; flex-basis:94px; border:1px solid #999; }
+.small-news .category { color:var(--red); }
+.small-news h2 { margin:2px 0; color:#111; font-size:13px; line-height:1.06; }
+.small-news p { margin:2px 0; color:#505050; font-size:9px; line-height:1.22; }
+.columns { grid-template-columns:2.1fr 1fr; gap:9px; padding-top:8px; }
+.list-news { gap:9px; margin-bottom:6px; padding:5px; background:#fff; border:1px solid #bbb; }
+.list-news img { width:122px; height:76px; flex-basis:122px; border:1px solid #999; padding:2px; background:#fff; }
+.date { color:#9a0006; font-size:8px; }
+.list-news h2 { margin:2px 0 3px; color:#161616; font-size:14px; line-height:1.05; }
+.list-news p { color:#555; font-size:10px; line-height:1.28; }
+.sidebar {
+  padding:6px; color:#222; background:#e9e9e5; border:1px solid #888;
+  box-shadow:inset 0 0 0 1px #fff;
+}
+.sidebar .section-title { margin:-1px -1px 6px; background:linear-gradient(#c71920,#850005); border-color:#700004; }
+.standings { background:#fff; border:1px solid #aaa; color:#222; font-size:9px; }
+.standings th { padding:5px; color:#fff; background:#333; }
+.standings td { height:29px; padding:3px 5px; border-bottom:1px solid #ccc; }
+.standings tr:nth-child(even) { background:#ededeb; }
+.crest { width:22px; height:22px; font-size:7px; }
+.sidebar-link { margin:7px 2px 0; }
+.prototype-note { color:#6d6d6d; font-size:8px; }
+.space { margin-top:11px !important; }
+.popular { background:#fff; border:1px solid #aaa; padding:0 6px; }
+.popular li { padding:6px 2px; border-bottom-color:#aaa; }
+.popular b { width:15px; color:var(--red); font-size:14px; }
+
+/* Kose yazarlari: vesikalik, baslik, metin */
+.writers-area { margin-top:10px; }
+.writers { grid-template-columns:1fr 1fr; gap:7px; }
+.writer-card {
+  grid-template-columns:82px 1fr; gap:8px; min-height:106px; padding:6px; color:#222;
+  background:linear-gradient(#fff,#e6e6e3); border:1px solid #999; border-top:3px solid var(--red);
+  box-shadow:inset 0 1px #fff;
+}
+.writer-card img,.writer-card:nth-child(2) img {
+  width:82px; height:96px; padding:2px; object-fit:cover; object-position:center top;
+  background:#fff; border:1px solid #888;
+}
+.writer-card span { color:#174f86; font-size:8px; }
+.writer-card h2 { margin:2px 0 4px; padding-bottom:3px; color:#111; border-bottom:1px dotted #888; font-size:15px; }
+.writer-card p { margin-bottom:4px; color:#4d4d4d; font-size:9px; line-height:1.28; }
+.writer-card .read-more { color:#a00006; }
+.regulation-banner {
+  margin-top:10px; padding:10px 13px; gap:12px; background-color:#202220;
+  border:1px solid #090909; border-top:4px solid var(--red); border-left-width:1px;
+  box-shadow:inset 0 1px rgba(255,255,255,.18);
+}
+.regulation-banner>img { width:58px; height:58px; }
+.regulation-banner span { color:#e2b33c; font-size:8px; }
+.regulation-banner h2 { margin:1px 0; font-size:19px; }
+.regulation-banner p { font-size:10px; }
+.regulation-banner>a {
+  padding:8px 10px; color:#fff; background:linear-gradient(#ca171d,#850005);
+  border:1px solid #5e0003; font-size:9px;
+}
+
+/* Kose yazisi detay sayfasi */
+.column-page { grid-template-columns:minmax(0,690px) 235px; gap:10px; padding-top:10px; }
+.breadcrumb { margin-bottom:8px; color:#666; font-size:9px; }
+.column-article { padding:8px 12px 18px; background:#fff; border:1px solid #999; box-shadow:none; }
+.column-label { margin-bottom:6px; padding:3px 7px; color:#fff; background:var(--red); font-size:8px; }
+.column-author { grid-template-columns:92px 1fr; gap:10px; margin-bottom:8px; padding:6px; background:linear-gradient(#f3f3f1,#dededb); border-block:1px solid #aaa; }
+.column-author img { width:92px; height:112px; }
+.column-author span { color:#777; font-size:8px; }
+.column-author h2 { margin:1px 0; color:#174f86; font-size:19px; }
+.column-author p { font-size:9px; }
+.column-head { padding-bottom:8px; border-bottom:4px double #333; }
+.column-head h1 { margin:3px 0 5px; color:#171717; font-size:34px; }
+.column-head .dek { margin-bottom:7px; color:#444; font-size:14px; }
+.column-meta { gap:7px; font-size:8px; }
+.column-meta button { padding:4px 7px; background:linear-gradient(#fff,#ccc); font-size:8px; }
+.column-body p { color:#252525; font:15px/1.6 Georgia,"Times New Roman",serif; }
+.column-body h2 { color:#151515; font-size:19px; }
+.column-body blockquote { padding:9px 12px; background:#ededeb; border-left-color:var(--red); font-size:15px; }
+.column-signature span { color:var(--red); }
+.column-aside { margin-top:27px; padding:6px; }
+
+/* Arsiv ve mevzuat */
+.rules-page { padding-top:10px; }
+.rules-hero { padding:14px; gap:16px; background:#222; border:1px solid #050505; border-bottom:5px solid var(--red); }
+.rules-hero>img { width:112px; height:112px; }
+.rules-hero span { color:#e2b33c; font-size:8px; }
+.rules-hero h1 { font-size:37px; }
+.rules-hero p { font-size:10px; }
+.pdf-button { padding:8px 10px; color:#fff; background:linear-gradient(#c71920,#850005); border:1px solid #680004; font-size:9px; }
+.rule-cards { gap:6px; margin:9px 0; }
+.rule-cards article { padding:8px; border:1px solid #aaa; border-top:3px solid var(--red); }
+.rule-cards span { color:#174f86; font-size:8px; }
+.rule-cards strong { color:#111; font-size:17px; }
+.rule-cards p { font-size:9px; }
+.rules-layout { gap:10px; }
+.rule-nav { padding:8px; background:#333; border-top:4px solid var(--red); }
+.rule-nav strong { color:#fff; font-size:9px; }
+.rule-nav a { padding:6px 0; font-size:9px; }
+.rule-sections section { margin-bottom:9px; border-color:#aaa; }
+.rule-sections header { padding:7px 10px; background:linear-gradient(#5c5f5b,#303330); border-bottom-color:var(--red); }
+.rule-sections header span { color:#fff; font-size:8px; }
+.rule-sections h2 { font-size:18px; }
+.rule-sections article { padding:9px; }
+.rule-sections article>b { color:#174f86; font-size:9px; }
+.rule-sections h3 { font-size:13px; }
+.rule-sections p { font-size:10px; }
+.archive-header { padding:8px 0 10px; }
+.article h1,.archive-header h1 { color:#171717; }
+.archive-header>span { color:var(--red); font-size:8px; }
+.archive-header p { font-size:10px; }
+.filters { margin-bottom:7px; }
+.filters button { padding:5px 8px; color:#174f86; border-color:#174f86; font-size:8px; }
+.filters button.active,.filters button:hover { color:#fff; background:#174f86; }
+.archive-list { border-top-color:var(--red); border-inline:1px solid #aaa; }
+.archive-list article { padding:8px; }
+.archive-list time { color:var(--red); font-size:21px; }
+.archive-list span { color:#174f86; font-size:8px; }
+.archive-list h2 { font-size:16px; }
+.archive-list p { font-size:10px; }
+.full-standings { margin-top:12px; }
+.full-standings th { padding:6px; background:#333; }
+.full-standings td { padding:6px; }
+footer { background:#171817; border-top:4px solid var(--red); }
+.footer-inner { min-height:70px; }
+.footer-inner>img { width:48px; height:48px; }
+.footer-inner>div strong { font-size:20px; }
+.table-wrap { max-width:100%; overflow-x:auto; }
+
+@media (max-width:760px) {
+  .wrap { max-width:calc(100% - 10px); }
+  .header { min-height:86px; }
+  .site-logo { width:68px; height:68px; }
+  .wordmark { font-size:37px; }
+  .menu-toggle { display:block; padding:7px 9px; color:#fff; background:linear-gradient(#c71920,#800004); border:1px solid #650003; font-size:9px; }
+  .nav a { padding:8px 11px; }
+  .utility-nav .wrap { max-width:100%; }
+  .hero-grid,.columns,.column-page { grid-template-columns:1fr; }
+  .hero { padding:0; border:0; }
+  .column-aside { margin-top:0; }
+  .writers { grid-template-columns:1fr; }
+}
+
+@media (max-width:520px) {
+  .top-inner span:first-child { display:none; }
+  .header { min-height:76px; padding:6px 8px; }
+  .site-logo { width:58px; height:58px; }
+  .wordmark { font-size:29px; letter-spacing:-3px; }
+  .wordmark small { margin-top:8px; font-size:6px; }
+  .page { padding:6px; }
+  .story-image--hero img { height:200px; }
+  .hero h1 { font-size:24px; }
+  .small-news img { width:88px; flex-basis:88px; }
+  .writer-card { grid-template-columns:76px 1fr; }
+  .writer-card img,.writer-card:nth-child(2) img { width:76px; height:91px; }
+  .column-article { padding:7px 9px 15px; }
+  .column-author { grid-template-columns:78px 1fr; }
+  .column-author img { width:78px; height:96px; }
+  .column-head h1 { font-size:29px; }
+  .column-meta { flex-wrap:wrap; }
+  .column-meta time { width:100%; }
+  .column-body p { font-size:14px; }
+  .rules-hero h1 { font-size:30px; }
+}
+
+@media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+
+/* Ajansspor 2008-2010 ana sayfa yerlesimi */
+.sr-only {
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+.portal-home { padding:6px; }
+.portal-leads {
+  display:grid; grid-template-columns:repeat(4,1fr); min-height:93px;
+  background:#fff; border:1px solid #999;
+}
+.portal-leads article {
+  min-width:0; padding:6px 7px; border-right:1px solid #b9b9b5;
+  background:linear-gradient(#fff,#f1f1ee);
+}
+.portal-leads article:last-child { border-right:0; }
+.portal-leads h2 { margin:0 0 3px; color:#1a1a1a; font:bold 10px/1.18 Tahoma,Verdana,sans-serif; }
+.portal-leads p { margin:0; color:#555; font-size:8px; line-height:1.25; }
+.portal-lead-photo { display:grid; grid-template-columns:58px 1fr; gap:6px; }
+.portal-lead-photo img { width:58px; height:76px; object-fit:cover; object-position:top; border:1px solid #999; }
+
+.portal-writers {
+  display:grid; grid-template-columns:repeat(4,1fr); margin-top:5px;
+  background:#ddd; border:1px solid #888;
+}
+.portal-writers article {
+  display:grid; grid-template-columns:1fr 52px; min-width:0; min-height:74px;
+  background:#f4f4f1; border-right:1px solid #999; border-top:4px solid #1c568b;
+}
+.portal-writers article:last-child { border-right:0; }
+.portal-writers article>div { min-width:0; padding:5px; }
+.portal-writers strong { display:block; color:#185184; font-size:9px; }
+.portal-writers span {
+  float:right; margin-top:-14px; padding:2px 4px; color:#fff; background:#b10a10;
+  font-size:6px; font-weight:bold;
+}
+.portal-writers a { display:block; margin-top:7px; color:#424242; font-size:9px; line-height:1.2; }
+.portal-writers img { width:52px; height:69px; object-fit:cover; object-position:top; border-left:1px solid #999; }
+
+.portal-layout {
+  display:grid; grid-template-columns:142px minmax(0,1fr) 225px; gap:5px;
+  align-items:start; margin-top:5px;
+}
+.portal-left,.portal-stream,.portal-right { min-width:0; }
+.portal-left { border:1px solid #8b8b88; background:#f6f6f3; }
+.portal-box-title {
+  padding:6px 7px; color:#fff; background:linear-gradient(#28669e,#0f4272);
+  border-bottom:1px solid #082d51; font:bold 9px Tahoma,Verdana,sans-serif;
+}
+.portal-box-title--grey { margin-top:7px; background:linear-gradient(#666,#353535); border-color:#222; }
+.portal-left nav a {
+  display:block; padding:5px 7px; color:#fff; background:#145186;
+  border-bottom:1px solid #3e75a5; font-size:9px; font-weight:bold;
+}
+.portal-left nav a:hover { background:#b2080e; text-decoration:none; }
+.portal-promo { display:block; padding:8px; text-align:center; }
+.portal-promo img { width:76px; height:76px; margin:0 auto 5px; }
+.portal-promo strong { display:block; color:#333; font-size:10px; }
+.portal-promo span { display:block; margin-top:5px; color:#ae080e; font-size:8px; font-weight:bold; }
+
+.portal-stream { border:1px solid #999; background:#fff; }
+.portal-stream-head {
+  display:flex; align-items:center; height:25px; color:#fff;
+  background:linear-gradient(#c71920,#850005); border-bottom:2px solid #590003;
+}
+.portal-stream-head span { align-self:stretch; display:grid; place-items:center; width:58px; background:#151515; font-size:7px; font-weight:bold; }
+.portal-stream-head h1 { margin:0 0 0 8px; font:bold 10px Tahoma,Verdana,sans-serif; }
+.portal-stream-head>a { margin-left:auto; margin-right:7px; color:#fff; font-size:7px; font-weight:bold; }
+.portal-main-story {
+  display:grid; grid-template-columns:158px 1fr; gap:7px; padding:7px;
+  background:#f2f2ef; border-bottom:1px solid #999;
+}
+.portal-main-story img { width:158px; height:105px; object-fit:cover; border:1px solid #888; }
+.portal-main-story span,.portal-news span { color:#b0080d; font-size:7px; font-weight:bold; }
+.portal-main-story h2 { margin:2px 0 3px; color:#111; font:900 18px/.98 Arial,Helvetica,sans-serif; }
+.portal-main-story p { margin:0 0 4px; color:#4c4c4c; font-size:9px; line-height:1.28; }
+.portal-more { color:#a30007; font-size:8px; font-weight:bold; }
+.portal-news {
+  display:grid; grid-template-columns:118px 1fr; gap:7px; padding:6px;
+  border-bottom:1px dotted #888;
+}
+.portal-news:last-child { border-bottom:0; }
+.portal-news img { width:118px; height:72px; object-fit:cover; border:1px solid #999; padding:2px; background:#fff; }
+.portal-news h2 { margin:1px 0 3px; color:#161616; font:bold 13px/1.05 Tahoma,Verdana,sans-serif; }
+.portal-news p { margin:0; color:#555; font-size:9px; line-height:1.27; }
+
+.portal-right { display:grid; gap:5px; }
+.portal-widget { padding:4px; background:#ededeb; border:1px solid #888; }
+.portal-widget h2 {
+  margin:0 0 4px; padding:6px; color:#fff; background:linear-gradient(#d01b21,#850005);
+  border:1px solid #6b0004; font:bold 9px Tahoma,Verdana,sans-serif;
+}
+.portal-widget table { width:100%; border-collapse:collapse; background:#fff; font-size:8px; }
+.portal-widget th { padding:4px; color:#fff; background:#333; text-align:left; }
+.portal-widget td { padding:4px; border-bottom:1px solid #ccc; }
+.portal-widget td:last-child,.portal-widget th:last-child { text-align:center; font-weight:bold; }
+.portal-widget>a { display:block; margin:5px 2px 1px; color:#a50007; font-size:8px; font-weight:bold; }
+.portal-widget ul,.portal-widget ol { margin:0; padding:0; list-style:none; background:#fff; border:1px solid #bbb; }
+.portal-widget li { display:flex; gap:5px; padding:5px; border-bottom:1px dotted #999; font-size:8px; }
+.portal-widget li:last-child { border-bottom:0; }
+.portal-widget time { color:#b0080d; font-weight:bold; }
+.portal-widget ol { counter-reset:portal-popular; }
+.portal-widget ol li { counter-increment:portal-popular; }
+.portal-widget ol li:before { content:counter(portal-popular); color:#b0080d; font:bold 13px Georgia,serif; }
+.portal-ad {
+  display:block; padding:9px; color:#fff; text-align:center;
+  background:linear-gradient(145deg,#123923,#071b10); border:3px solid #bb0b11;
+}
+.portal-ad:hover { color:#fff; text-decoration:none; }
+.portal-ad small { display:block; color:#f3ce51; font-size:7px; }
+.portal-ad strong { display:block; margin:2px 0; font:900 23px/.9 "Arial Black",Arial,sans-serif; text-shadow:2px 2px #850005; }
+.portal-ad img { width:100%; height:80px; object-fit:cover; margin:5px 0; border:1px solid #ddd; }
+.portal-ad span { display:inline-block; padding:4px 7px; color:#fff; background:#b0080d; font-size:8px; font-weight:bold; }
+
+@media (max-width:760px) {
+  .portal-leads { grid-template-columns:1fr 1fr; }
+  .portal-leads article:nth-child(2) { border-right:0; }
+  .portal-leads article:nth-child(-n+2) { border-bottom:1px solid #aaa; }
+  .portal-writers { grid-template-columns:1fr 1fr; }
+  .portal-writers article:nth-child(2) { border-right:0; }
+  .portal-writers article:nth-child(-n+2) { border-bottom:1px solid #999; }
+  .portal-layout { grid-template-columns:1fr; }
+  .portal-left nav { display:grid; grid-template-columns:1fr 1fr; }
+  .portal-promo,.portal-box-title--grey { display:none; }
+  .portal-right { grid-template-columns:1fr 1fr; }
+  .portal-ad { grid-row:span 2; }
+}
+
+@media (max-width:520px) {
+  .portal-leads { grid-template-columns:1fr; }
+  .portal-leads article { border-right:0; border-bottom:1px solid #aaa; }
+  .portal-leads article:last-child { border-bottom:0; }
+  .portal-lead-photo { grid-template-columns:52px 1fr; }
+  .portal-lead-photo img { width:52px; height:62px; }
+  .portal-writers { grid-template-columns:1fr 1fr; }
+  .portal-writers article { grid-template-columns:1fr 44px; }
+  .portal-writers img { width:44px; height:65px; }
+  .portal-writers span { display:none; }
+  .portal-main-story { grid-template-columns:1fr; }
+  .portal-main-story img { width:100%; height:180px; }
+  .portal-news { grid-template-columns:100px 1fr; }
+  .portal-news img { width:100px; height:66px; }
+  .portal-right { grid-template-columns:1fr; }
+  .portal-ad { grid-row:auto; }
+}
+
+/* 2026-08-20 revizyonu: FUTMAC'in genel temasini E-Mac yesiline tasir. */
+:root { --red:#075b35; --red-dark:#043b22; --blue:#0b6b42; }
+body {
+  background-color:#cbd7ce;
+  background-image:linear-gradient(rgba(255,255,255,.76),rgba(255,255,255,0) 180px),repeating-linear-gradient(0deg,rgba(4,59,34,.025) 0,rgba(4,59,34,.025) 1px,transparent 1px,transparent 3px);
+}
+.wordmark strong { color:#075b35; }
+.top-inner span:first-child,.header-meta strong { color:#075b35; }
+.nav { background:linear-gradient(#15764b 0,#075b35 49%,#043b22 51%,#07502f 100%); border-color:#032e1a; border-top-color:#4b9a74; }
+.nav a { border-right-color:#03341d; text-shadow:0 -1px #022d19; }
+.nav a:hover,.nav a:focus-visible,.nav a.active { background:linear-gradient(#1a4d36,#062b1b); }
+.utility-nav { background:linear-gradient(#f3f8f4,#d7e5da); }
+.utility-nav a:hover { color:#075b35; }
+.breaking strong,.portal-stream-head,.portal-widget h2,.column-label {
+  background:linear-gradient(#15764b,#06462a); border-color:#04371f; text-shadow:0 -1px #022b18;
+}
+.ticker i,.category,.date,.read-more,.sidebar-link,.portal-more,.archive-header>span { color:#075b35; }
+.page { background:#edf3ee; }
+.section-title { background:linear-gradient(#35664e,#173e2b); border-color:#102d20; border-top-color:#6e9b83; }
+.section-title--bar,.portal-box-title { background:linear-gradient(#1e7650,#0a4d30); border-color:#063a24; border-top-color:#58a17d; }
+.portal-leads article,.portal-writers article,.list-news,.column-article,.rule-cards article,.rule-sections section,.archive-list {
+  background:linear-gradient(#fbfdfb,#e3eee6);
+}
+.portal-writers article { border-top-color:#075b35; }
+.portal-writers strong,.portal-writers a:hover,.portal-main-story span,.portal-news span,.archive-list span { color:#075b35; }
+.portal-writers span { background:#075b35; }
+.portal-left nav a { background:#0e6640; border-bottom-color:#438565; }
+.portal-left nav a:hover { background:#043b22; }
+.portal-promo span,.portal-widget>a,.portal-widget time,.portal-widget ol li:before { color:#075b35; }
+.portal-stream,.portal-widget,.side-news,.sidebar { background:#dde9df; }
+.portal-main-story { background:#e3eee6; }
+.portal-news { background:#f8fbf8; }
+.portal-news:nth-of-type(odd) { background:#eef5ef; }
+.portal-ad { border-color:#0c6b43; }
+.portal-ad span,.regulation-banner>a,.pdf-button { background:linear-gradient(#16764b,#06462a); border-color:#04371f; }
+.column-author { background:linear-gradient(#edf5ef,#d9e8dd); }
+.column-author h2,.column-signature span { color:#075b35; }
+.column-body blockquote { border-left-color:#075b35; background:#e4eee6; }
+.rules-hero { border-bottom-color:#168055; }
+.rule-cards article { border-top-color:#075b35; }
+.rule-cards span,.rule-sections article>b { color:#075b35; }
+.rule-nav { background:#17402d; border-top-color:#168055; }
+.rule-sections header { background:linear-gradient(#35664e,#173e2b); border-bottom-color:#168055; }
+.filters button { color:#075b35; border-color:#075b35; }
+.filters button.active,.filters button:hover { background:#075b35; }
+.archive-list { border-top-color:#075b35; }
+.archive-list time { color:#075b35; }
+footer { border-top-color:#168055; }
+
+.budget-rule-highlight {
+  display:grid; grid-template-columns:165px 1fr auto; gap:10px; align-items:center;
+  margin-bottom:6px; padding:8px 10px; color:#fff;
+  background:linear-gradient(#13744a,#06442a); border:1px solid #03351f;
+  border-left:7px solid #d4aa3b; box-shadow:inset 0 1px rgba(255,255,255,.2);
+}
+.budget-rule-highlight:hover { color:#fff; text-decoration:none; background:linear-gradient(#178656,#075332); }
+.budget-rule-highlight strong { font:900 15px/1 Arial,Helvetica,sans-serif; }
+.budget-rule-highlight span { font-size:9px; line-height:1.3; }
+.budget-rule-highlight b { padding:5px 7px; color:#163c29; background:#e5c25f; font-size:8px; white-space:nowrap; }
+.budget-rule-highlight--rules { margin:8px 0; }
+
+@media (max-width:600px) {
+  .budget-rule-highlight { grid-template-columns:1fr; gap:4px; }
+  .budget-rule-highlight b { width:max-content; }
+}
+
+/* Ödülleri ana akışta görünür kılan, eski portal tarzında altın çerçeveli kutu. */
+.portal-news--awards {
+  position:relative;
+  margin:6px;
+  padding:9px;
+  background:linear-gradient(135deg,#fff8d8,#e8d384 58%,#cfad3d) !important;
+  border:3px double #8b6710 !important;
+  box-shadow:inset 0 0 0 1px #fff6c7,0 1px 3px rgba(0,0,0,.28);
+}
+.portal-news--awards:before {
+  content:"BÜYÜK ÖDÜL";
+  position:absolute; right:7px; top:-8px;
+  padding:3px 7px; color:#fff; background:#8b120c;
+  border:1px solid #560703; font:bold 7px Tahoma,Verdana,sans-serif;
+  box-shadow:1px 1px 0 rgba(0,0,0,.25);
+}
+.portal-news--awards img { border:2px solid #8b6710; background:#153d2b; }
+.portal-news--awards span { color:#694b00; }
+.portal-news--awards h2 { padding-right:54px; color:#4a3300; font-size:16px; }
+.portal-news--awards p { color:#392d0d; font-weight:bold; }
+.reward-button {
+  display:inline-block; margin-top:5px; padding:5px 8px;
+  color:#fff; background:linear-gradient(#a41d15,#6c0b07);
+  border:1px solid #4b0704; font:bold 8px Tahoma,Verdana,sans-serif;
+}
+.reward-button:hover { color:#fff; text-decoration:none; background:#4f0906; }
+
+@media (max-width:520px) {
+  .portal-news--awards { margin:5px; grid-template-columns:100px 1fr; }
+  .portal-news--awards h2 { padding-right:0; }
+}
