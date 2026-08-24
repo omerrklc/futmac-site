@@ -32,6 +32,7 @@
 - Sistem kontrolü, Supabase'te yeni kullanıcı kaydı ve anonim hesap ayarlarını da denetleyecek şekilde genişletildi.
 - Canlı site, Supabase Auth, genel veri uçları ve korunan tablolar için günlük salt okunur GitHub Actions sağlık kontrolü eklendi.
 - Supabase'te herkese açık yeni kullanıcı kaydı ve anonim giriş kapatıldı; günlük sağlık kontrolü bu ayarların kapalı kalmasını zorunlu olarak denetleyecek moda alındı.
+- Haber sahipliği yetkisi sıkılaştırıldı: editör yalnızca kendi oluşturduğu içeriği düzenleyebilir, yayından kaldırabilir ve silebilir; admin bütün içerikleri yönetebilir.
 
 ## Test sonucu
 

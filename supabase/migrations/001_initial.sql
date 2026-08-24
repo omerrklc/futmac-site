@@ -113,9 +113,12 @@ using ((status = 'published' and published_at <= now()) or public.is_editor());
 drop policy if exists articles_editor_insert on public.articles;
 create policy articles_editor_insert on public.articles for insert to authenticated with check (public.is_editor() and created_by = auth.uid());
 drop policy if exists articles_editor_update on public.articles;
-create policy articles_editor_update on public.articles for update to authenticated using (public.is_editor()) with check (public.is_editor());
+create policy articles_editor_update on public.articles for update to authenticated
+using (public.is_admin() or (public.is_editor() and created_by = auth.uid()))
+with check (public.is_admin() or (public.is_editor() and created_by = auth.uid()));
 drop policy if exists articles_editor_delete on public.articles;
-create policy articles_editor_delete on public.articles for delete to authenticated using (public.is_editor());
+create policy articles_editor_delete on public.articles for delete to authenticated
+using (public.is_admin() or (public.is_editor() and created_by = auth.uid()));
 
 grant usage on schema public to anon, authenticated;
 grant select on public.categories, public.articles to anon, authenticated;

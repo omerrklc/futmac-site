@@ -3,6 +3,7 @@
 
   const config = window.FUTMAC_SUPABASE_CONFIG || {};
   const ARTICLE_FIELDS = 'id,slug,content_type,category_slug,title,excerpt,body,author_name,author_slug,image_url,image_alt,status,read_time,published_at,created_at,updated_at';
+  const MANAGED_ARTICLE_FIELDS = ARTICLE_FIELDS + ',created_by';
   let clientPromise = null;
 
   function enabled() {
@@ -60,6 +61,7 @@
       imageAlt: row.image_alt || '',
       status: scheduled ? 'scheduled' : row.status,
       readTime: row.read_time || '3 dk',
+      ownerId: row.created_by || null,
       url: 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
       remote: true
     };
@@ -150,7 +152,8 @@
     const client = await getClient();
     const requestedLimit = Number(options && options.limit);
     const limit = Math.min(Math.max(Number.isFinite(requestedLimit) ? requestedLimit : (options && options.publishedOnly ? 200 : 500), 1), 500);
-    let query = client.from('articles').select(ARTICLE_FIELDS).order('published_at', { ascending: false, nullsFirst: false }).order('updated_at', { ascending: false }).limit(limit);
+    const fields = options && options.publishedOnly ? ARTICLE_FIELDS : MANAGED_ARTICLE_FIELDS;
+    let query = client.from('articles').select(fields).order('published_at', { ascending: false, nullsFirst: false }).order('updated_at', { ascending: false }).limit(limit);
     if (options && options.publishedOnly) query = query.eq('status', 'published').lte('published_at', new Date().toISOString());
     const result = await query;
     if (result.error) throw result.error;
@@ -321,6 +324,8 @@
     const auditResult = await client.from('audit_log').select('id').limit(1);
     if (auditResult.error) throw auditResult.error;
     if (!isAdmin && (auditResult.data || []).length) throw new Error('Editör hesabı işlem geçmişini görmemelidir.');
+    const ownershipResult = await client.from('articles').select('created_by').limit(1);
+    if (ownershipResult.error) throw new Error('Haber sahipliği politikası hazır değil. 004_article_ownership.sql migration dosyasını çalıştırın.');
     const authSettingsResponse = await fetch(config.url + '/auth/v1/settings', { headers:{ apikey:config.publishableKey } });
     if (!authSettingsResponse.ok) throw new Error('Auth güvenlik ayarları okunamadı.');
     const authSettings = await authSettingsResponse.json();
@@ -329,7 +334,7 @@
       database:true,
       audit:isAdmin ? 'ready' : 'protected',
       profile:profile,
-      permissions:{ editor:true, admin:isAdmin, profileScope:isAdmin ? 'all' : 'self' },
+      permissions:{ editor:true, admin:isAdmin, profileScope:isAdmin ? 'all' : 'self', articleScope:isAdmin ? 'all' : 'own' },
       registration:{ signupDisabled:authSettings.disable_signup === true, anonymousDisabled:!(authSettings.external && authSettings.external.anonymous_users === true) },
       library:'2.112.3-local',
       mediaBucket:Boolean(config.mediaBucket)
@@ -340,8 +345,8 @@
     const client = await getClient();
     const row = articleToRow(article);
     const result = row.id
-      ? await client.from('articles').update(row).eq('id', row.id).select(ARTICLE_FIELDS).single()
-      : await client.from('articles').insert(row).select(ARTICLE_FIELDS).single();
+      ? await client.from('articles').update(row).eq('id', row.id).select(MANAGED_ARTICLE_FIELDS).single()
+      : await client.from('articles').insert(row).select(MANAGED_ARTICLE_FIELDS).single();
     if (result.error) throw result.error;
     return rowToArticle(result.data);
   }
