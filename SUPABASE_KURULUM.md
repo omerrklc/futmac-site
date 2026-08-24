@@ -17,7 +17,8 @@ where id = (select id from auth.users where email = 'yonetici@example.com');
 6. Project Settings > API bölümünden proje URL’sini ve **publishable key** (eski projelerde `anon` key) değerini alın.
 7. `assets/js/supabase-config.js` dosyasında `enabled` değerini `true` yapın; URL ve public anahtarı ilgili alanlara girin.
 8. Siteyi VS Code Live Server ile açın ve `admin.html` üzerinden gerçek kullanıcıyla giriş yapın.
-9. Authentication > URL Configuration bölümünde `https://futmac.com.tr` adresini Site URL olarak ayarlayın. Redirect URLs listesine `https://futmac.com.tr/sifre-yenile.html` adresini ekleyin. Alan adı DNS ve HTTPS doğrulanana kadar mevcut GitHub Pages parola yenileme adresini de geçici olarak listede tutun.
+9. SQL Editor içinde `supabase/migrations/004_article_ownership.sql` dosyasını çalıştırın. Bu politika editörleri kendi haberleriyle sınırlar; admin bütün haberleri yönetmeye devam eder.
+10. Authentication > URL Configuration bölümünde `https://futmac.com.tr` adresini Site URL olarak ayarlayın. Redirect URLs listesine `https://futmac.com.tr/sifre-yenile.html` adresini ekleyin. Alan adı DNS ve HTTPS doğrulanana kadar mevcut GitHub Pages parola yenileme adresini de geçici olarak listede tutun.
 10. Site halka açık üyelik kullanmadığı için Authentication ayarlarında **Allow new users to sign up** ve **Allow anonymous sign-ins** seçeneklerini kapatın. Yeni admin/editör hesaplarını yalnızca yetkili kişi Supabase Dashboard içinden oluşturmalıdır.
 11. `admin.html > Ayarlar / Backend > Sistemi ve Yetkileri Kontrol Et` düğmesiyle yeni kullanıcı kaydının ve anonim hesabın kapalı göründüğünü doğrulayın.
 
