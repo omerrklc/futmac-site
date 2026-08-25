@@ -1,6 +1,11 @@
 (async function () {
   'use strict';
 
+  document.querySelectorAll('[data-current-date]').forEach(function (item) {
+    item.textContent = new Intl.DateTimeFormat('tr-TR', {
+      day:'2-digit', month:'long', year:'numeric', weekday:'long'
+    }).format(new Date()).toLocaleUpperCase('tr-TR');
+  });
   const data = window.FUTMAC_DATA || null;
   if (window.FUTMAC_REMOTE_READY) await window.FUTMAC_REMOTE_READY;
   const body = document.body;

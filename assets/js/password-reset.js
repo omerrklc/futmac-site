@@ -6,6 +6,12 @@
   const submit = form.querySelector('[type="submit"]');
   submit.disabled = true;
 
+  const secureAuthContext = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (!secureAuthContext) {
+    message.textContent = 'Parola yenileme yalnızca güvenli HTTPS bağlantısında kullanılabilir.';
+    return;
+  }
+
   if (!backend || !backend.enabled) {
     message.textContent = 'Parola yenileme yalnızca Supabase bağlantısı açıkken kullanılabilir.';
     return;
