@@ -1,5 +1,12 @@
 # FUTMAC Teslim Notu
 
+## 25 Ağustos 2026 — bağlantı dayanıklılığı
+
+- Ziyaretçi sayfalarının Supabase yanıtını sınırsız beklemesi önlendi.
+- Ortak menü, yerel haberler, puan durumu ve fikstür en geç 4,5 saniye sonra yerel veriyle kullanılabilir hâle geliyor.
+- Uzak veri daha sonra tamamlanırsa bağlantı durumu sayfa üzerinde teknik hata göstermeden güncelleniyor.
+- Kesinti senaryosu 390 piksel mobil görünümde doğrulandı; menü ve içerik açıldı, yatay taşma ve konsol hatası oluşmadı.
+
 ## Bu sürümde tamamlananlar
 
 - Haber ve köşe yazıları için taslak kaydetme, doğrudan yayınlama, ileri tarihli yayın planlama ve onaylı yayından kaldırma akışları ayrıldı.
