@@ -24,6 +24,7 @@ Site `file://` ile de açılabilir. Veri katmanı JSON isteği yerine `assets/js
 - `kurallar.html`: 7 kısım ve 19 maddelik mevzuat özeti ve resmî PDF bağlantısı
 - `404.html`: Sayfa bulunamadı görünümü
 - `admin.html`: Haber, fikstür, puan durumu ve yazar yönetim paneli
+- `yonetim-rehberi.html`: Admin/editör kullanımı, gerçek lig verisi, yedekleme ve Google görünürlüğü rehberi
 - `sifre-yenile.html`: Güvenli parola yenileme ekranı
 - `haber-onizleme.html`: Admin panelinde hazırlanan yerel içeriğin detay görünümü
 
@@ -39,6 +40,8 @@ Site `file://` ile de açılabilir. Veri katmanı JSON isteği yerine `assets/js
 - Supabase modu: gerçek kullanıcı girişi, ortak haber/taslak veritabanı ve kapak görseli yükleme sağlar.
 
 Bir içerik yayımlandığında panel, ziyaretçilerin açabileceği gerçek haber bağlantısını gösterir. **Yayındaki Haberi Aç** ile sayfa kontrol edilebilir; **Bağlantıyı Kopyala** ile adres doğrudan paylaşılabilir. Taslak ve ileri tarihli içeriklerde ziyaretçi bağlantısı henüz açık olmadığı için kopyalama seçeneği gösterilmez.
+
+Paneldeki **Ayarlar / Backend → Kullanım Rehberini Aç** bağlantısı; haber yayınlama, gerçek takım/fikstür/puan verisi girme, yedekleme, hesap devri ve Google Search Console adımlarını tek ekranda açıklar.
 
 Supabase kurulumu için `SUPABASE_KURULUM.md` dosyasını izleyin. Başlangıç şeması ve Row Level Security kuralları `supabase/migrations/001_initial.sql`; lig yönetimi şeması `supabase/migrations/002_league_management.sql`; işlem geçmişi ve üretim güvenliği `supabase/migrations/003_security_hardening.sql` içindedir. Tarayıcı bağlantısı `assets/js/supabase-config.js` dosyasından açılır. `service_role` anahtarı frontend dosyalarına kesinlikle eklenmemelidir.
 

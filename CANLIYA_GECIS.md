@@ -53,7 +53,7 @@ Yeni e-posta kaydı ve anonim giriş 24 Ağustos 2026 tarihinde canlı Supabase 
 6. Supabase Site URL ve Redirect URLs yeni alan adına çevrilir.
 7. Google Search Console'a alan adı eklenip `sitemap.xml` gönderilir.
 
-DNS ve HTTPS sertifikasının tamamlanması birkaç saat sürebilir; bazı durumlarda 48 saate yaklaşabilir.
+DNS kontrolü, GitHub Pages sertifikası ve **Enforce HTTPS** 25 Ağustos 2026 tarihinde tamamlandı. `http`, `www` ve HTTPS adresleri güvenli ana adres `https://futmac.com.tr/` üzerinde birleşir.
 
 ## Yetki ve sahiplik devri
 
@@ -83,7 +83,7 @@ Teknik sahiplik de devredilecekse:
 
 ## Otomatik sağlık kontrolü
 
-`.github/workflows/futmac-health.yml` iş akışı DNS ve HTTPS hazır olana kadar yalnızca elle çalıştırılacak durumdadır. Alan adı canlı doğrulandıktan sonra her gün Türkiye saatiyle yaklaşık 09.15'te ve ilgili ana dal değişikliklerinde çalışacak biçimde etkinleştirilir. Kontrol:
+`.github/workflows/futmac-health.yml` iş akışı her gün Türkiye saatiyle yaklaşık 08.17'de ve gerektiğinde elle çalışır. Kontrol:
 
 - GitHub Pages ana sayfasını, admin `noindex` durumunu, sitemap ve robots dosyalarını,
 - Supabase Auth sağlık durumunu ve kayıt ayarını,
@@ -96,4 +96,4 @@ Workflow içindeki `REQUIRE_CLOSED_SIGNUP` değeri `true` durumundadır. Herkese
 
 ## Değişiklik sınırı
 
-`CNAME` dosyası `futmac.com.tr` olarak hazırlanmıştır. DNS kayıtları yalnızca Natro siparişi aktif olduktan sonra değiştirilir. İlave ücretli hosting, sunucu veya SSL paketi alınmaz.
+`CNAME` dosyası `futmac.com.tr` olarak aktiftir. DNS kayıtları ve GitHub Pages özel alan adı bağlantısı çalışan üretim yapılandırmasıdır; planlı taşıma dışında değiştirilmez. İlave ücretli hosting, sunucu veya SSL paketi alınmaz.
