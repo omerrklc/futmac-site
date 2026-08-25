@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="tr">
-<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://pwmwymvnyfvrumlizbuw.supabase.co wss://pwmwymvnyfvrumlizbuw.supabase.co; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"><meta name="referrer" content="strict-origin-when-cross-origin">
+<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://pwmwymvnyfvrumlizbuw.supabase.co wss://pwmwymvnyfvrumlizbuw.supabase.co; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="strict-origin-when-cross-origin">
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow"><meta name="description" content="FUTMAC içerik ve lig yönetim paneli.">
   <title>Yönetim Paneli | FUTMAC</title>
@@ -69,13 +69,13 @@
                 <form class="admin-form" data-article-form>
                   <h3 id="editor-title" class="admin-field--wide">Yeni içerik</h3>
                   <input type="hidden" name="id">
-                  <div class="admin-field admin-field--wide"><label for="article-title">Başlık</label><input id="article-title" name="title" minlength="3" maxlength="120" required></div>
+                  <div class="admin-field admin-field--wide"><label for="article-title">Başlık</label><input id="article-title" name="title" minlength="3" maxlength="120" required><small><span data-char-count="title">0</span>/120 karakter</small></div>
                   <div class="admin-field"><label for="article-slug">Kısa adres</label><input id="article-slug" name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required><small>Örnek: haftanin-transfer-haberi</small></div>
                   <div class="admin-field"><label for="article-type">İçerik türü</label><select id="article-type" name="type"><option value="haber">Haber</option><option value="yazi">Köşe yazısı</option></select></div>
                   <div class="admin-field"><label for="article-category">Kategori</label><select id="article-category" name="category" required><option value="futbol">Futbol</option></select></div>
                   <div class="admin-field"><label for="article-author">Yazar</label><select id="article-author" name="author"><option>FUTMAC Servisi</option><option>Furkan Katılmış</option><option>Eray</option><option>Berkay Minkara</option></select></div>
-                  <div class="admin-field admin-field--wide"><label for="article-excerpt">Spot metni</label><textarea id="article-excerpt" name="excerpt" minlength="3" maxlength="280" required></textarea></div>
-                  <div class="admin-field admin-field--wide"><label for="article-content">Haber metni</label><textarea id="article-content" name="content" minlength="20" required placeholder="Paragrafları boş satırla ayırabilirsiniz."></textarea></div>
+                  <div class="admin-field admin-field--wide"><label for="article-excerpt">Spot metni</label><textarea id="article-excerpt" name="excerpt" minlength="3" maxlength="280" required></textarea><small><span data-char-count="excerpt">0</span>/280 karakter</small></div>
+                  <div class="admin-field admin-field--wide"><label for="article-content">Haber metni</label><textarea id="article-content" name="content" minlength="20" maxlength="20000" required placeholder="Paragrafları boş satırla ayırabilirsiniz."></textarea><small><span data-char-count="content">0</span>/20.000 karakter</small></div>
                   <div class="admin-field admin-field--wide"><label for="article-image">Görsel yolu veya adresi</label><input id="article-image" name="image" value="assets/images/futbol-manset.svg" maxlength="1000" required><small data-image-note>Yerel demoda yalnızca assets/images/ altındaki görseller kullanılabilir.</small></div>
                   <div class="admin-field admin-field--wide"><label for="article-image-alt">Görsel açıklaması</label><input id="article-image-alt" name="imageAlt" maxlength="180" placeholder="Görselde görünen kişi veya olay"><small>Dekoratif değilse görseli kısa ve anlaşılır biçimde tarif edin.</small></div>
                   <div class="admin-field admin-field--wide" data-image-upload-wrap hidden><label for="article-image-file">Yeni kapak görseli yükle</label><input id="article-image-file" type="file" accept="image/jpeg,image/png,image/webp"><button class="admin-button" type="button" data-upload-image>GÖRSELİ YÜKLE</button><small>JPG, PNG veya WebP; en fazla 5 MB.</small></div>
