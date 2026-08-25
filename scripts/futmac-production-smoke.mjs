@@ -47,7 +47,20 @@ async function apiCheck(name, url, headers, allowedStatuses) {
   record(name, allowedStatuses.includes(response.status), 'HTTP ' + response.status);
 }
 
+async function redirectCheck(name, url) {
+  const response = await request(url);
+  const finalUrl = new URL(response.url);
+  record(
+    name,
+    response.status === 200 && finalUrl.protocol === 'https:' && finalUrl.hostname === 'futmac.com.tr',
+    'HTTP ' + response.status + ' → ' + response.url
+  );
+}
+
 try {
+  await redirectCheck('HTTP güvenli adrese yönleniyor', 'http://futmac.com.tr/');
+  await redirectCheck('www güvenli ana adrese yönleniyor', 'http://www.futmac.com.tr/');
+  await redirectCheck('HTTPS www ana adrese yönleniyor', 'https://www.futmac.com.tr/');
   await textCheck('Ana sayfa', new URL('index.html', SITE), 'FUTMAC');
   await textCheck('Admin noindex', new URL('admin.html', SITE), 'noindex,nofollow');
   await textCheck('Site haritası', new URL('sitemap.xml', SITE), '<urlset');

@@ -1,5 +1,12 @@
 # FUTMAC Teslim Notu
 
+## 25 Ağustos 2026 — HTTPS sonrası üretim izlemesi
+
+- HTTPS sertifikası ve zorunlu HTTPS yönlendirmesi etkinleşti.
+- Canlı sağlık testi HTTP, `www` ve HTTPS yönlendirmelerini de doğrulayacak şekilde genişletildi.
+- GitHub Actions sağlık testi her gün otomatik çalışacak biçimde etkinleştirildi; gerektiğinde elle de başlatılabilir.
+- Sağlık testi; ana sayfa, admin `noindex`, site haritası, Supabase Auth, kapalı kayıt ayarları, herkese açık lig tabloları ve korumalı yönetim tablolarını kontrol eder.
+
 ## 25 Ağustos 2026 — bağlantı dayanıklılığı
 
 - Ziyaretçi sayfalarının Supabase yanıtını sınırsız beklemesi önlendi.
