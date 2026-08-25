@@ -1,5 +1,12 @@
 # FUTMAC Teslim Notu
 
+## 26 Ağustos 2026 — yazar düzenleme erişimi
+
+- Yazar düzenleme düğmesi tablonun görünmeyen sağ kenarından yazar adının hemen altına taşındı.
+- Yazar seçildiğinde form başlığı ve kaydet düğmesi düzenleme durumunu açıkça gösteriyor.
+- Düzenlemeden sonra yeni kayıt açmak için “Yeni Yazar” düğmesi eklendi.
+- Küçük ekranlarda yazar tablosunun gereksiz yatay taşması azaltıldı; düzenleme işlemi her genişlikte görünür kaldı.
+
 ## 25 Ağustos 2026 — yönetim ve teslim paketi
 
 - Admin paneline doğrudan açılan kapsamlı kullanım rehberi eklendi.
