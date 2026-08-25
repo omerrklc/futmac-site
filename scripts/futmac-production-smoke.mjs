@@ -63,6 +63,7 @@ try {
   await redirectCheck('HTTPS www ana adrese yönleniyor', 'https://www.futmac.com.tr/');
   await textCheck('Ana sayfa', new URL('index.html', SITE), 'FUTMAC');
   await textCheck('Admin noindex', new URL('admin.html', SITE), 'noindex,nofollow');
+  await textCheck('Yönetim rehberi', new URL('yonetim-rehberi.html', SITE), 'FUTMAC YÖNETİM REHBERİ');
   await textCheck('Site haritası', new URL('sitemap.xml', SITE), '<urlset');
   await textCheck('Kök robots.txt', new URL('../robots.txt', SITE), 'Sitemap:');
   await textCheck('Dinamik haber indeksleme kodu', new URL('assets/js/app.js', SITE), "article.status === 'published' ? 'index,follow'");

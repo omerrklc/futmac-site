@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="FUTMAC admin ve editör kullanım, lig verisi, yedekleme ve devir rehberi.">
+  <title>Yönetim Rehberi | FUTMAC</title>
+  <link rel="canonical" href="https://futmac.com.tr/yonetim-rehberi.html">
+  <link rel="icon" href="assets/images/logo/emac-turka-transparent.png">
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="admin-body">
+  <a class="skip-link" href="#rehber">İçeriğe geç</a>
+  <div class="admin-shell">
+    <header class="admin-top">
+      <img src="assets/images/logo/emac-turka-transparent.png" alt="E-Mac Turka arması">
+      <div><h1>FUTMAC YÖNETİM REHBERİ</h1><p>Admin ve editörler için kısa kullanım kılavuzu</p></div>
+      <div class="admin-top__actions"><a class="admin-button admin-button--gold" href="admin.html">PANELE DÖN</a><a class="admin-button" href="index.html">SİTEYİ GÖR</a></div>
+    </header>
+    <main id="rehber" class="admin-main">
+      <section class="admin-placeholder admin-settings-block">
+        <h2>1. Haber ve köşe yazısı yayımlama</h2>
+        <ol>
+          <li><strong>Yeni İçerik</strong> düğmesine basın; başlık, kısa adres, kategori, yazar, spot ve metni doldurun.</li>
+          <li>Kapak görselini seçip önce <strong>Görseli Yükle</strong> düğmesine basın. Yalnızca JPG, PNG veya WebP ve en fazla 5 MB kullanın.</li>
+          <li><strong>Önizle</strong> ile metni ve görseli kontrol edin. Taslak için <strong>Taslağı Kaydet</strong>, canlı yayın için <strong>Yayınla</strong> düğmesini kullanın.</li>
+          <li>Yayımlanan bağlantıyı açıp ana sayfa, kategori ve arşivde doğru göründüğünü kontrol edin.</li>
+        </ol>
+        <p>Editör yalnızca kendi oluşturduğu içerikleri düzenleyip silebilir. Admin bütün içeriklere müdahale edebilir.</p>
+      </section>
+
+      <section class="admin-placeholder admin-settings-block">
+        <h2>2. Gerçek lig verilerini girme sırası</h2>
+        <ol>
+          <li><strong>Takımlar:</strong> Takım adı, yönetici, kısa ad ve arma bilgilerini girin.</li>
+          <li><strong>Fikstür:</strong> Haftayı, ev/deplasman takımını, tarih ve saati kaydedin. Maç başlayınca CANLI, bitince TAMAMLANDI durumunu ve skoru seçin.</li>
+          <li><strong>Puan Durumu:</strong> Oynanan, galibiyet, beraberlik, mağlubiyet, fantazi puanı, lig puanı, hareket ve form alanlarını güncelleyin.</li>
+          <li><strong>Yazarlar ve Kategoriler:</strong> Yalnızca gerçekten kullanılacak kayıtları aktif tutun.</li>
+        </ol>
+        <p>Takım adlarını puan durumu veya fikstüre bağlamadan önce tamamlayın. Örnek verileri gerçek bilgi gelmeden tahmin ederek değiştirmeyin.</p>
+      </section>
+
+      <section class="admin-placeholder admin-settings-block">
+        <h2>3. Yayın öncesi kontrol</h2>
+        <ul>
+          <li>Başlık, tarih, yazar, kategori ve görsel açıklaması doğru mu?</li>
+          <li>Görsel telefonda düzgün kırpılıyor ve yükleniyor mu?</li>
+          <li>Haber bağlantısı gizli pencere veya çıkış yapılmış tarayıcıda açılıyor mu?</li>
+          <li>Taslak ve ileri tarihli haberler ziyaretçilere kapalı mı?</li>
+          <li>Editör, başka editöre ait içerikte yalnızca “Gör” seçeneğini görüyor mu?</li>
+        </ul>
+      </section>
+
+      <section class="admin-placeholder admin-settings-block">
+        <h2>4. Yedekleme ve hesap devri</h2>
+        <ul>
+          <li>Her önemli yayın veya lig güncellemesinden sonra <strong>Ayarlar / Backend → Tam JSON Yedeğini İndir</strong> seçeneğini kullanın.</li>
+          <li>İndirilen yedeği herkese açık GitHub deposuna koymayın; güvenli ve erişimi sınırlı bir klasörde saklayın.</li>
+          <li>Supabase veritabanı ile Storage görsellerinin ayrı yedekler olduğunu unutmayın.</li>
+          <li>Her admin ve editör kendi hesabını kullansın; ortak parola paylaşmayın.</li>
+          <li>Alan adı, GitHub ve Supabase sahipliği devredilecekse yeni sahibin erişimi doğrulandıktan sonra eski erişimleri kaldırın.</li>
+        </ul>
+      </section>
+
+      <section class="admin-placeholder admin-settings-block">
+        <h2>5. Google görünürlüğü</h2>
+        <ol>
+          <li>Google Search Console’da <strong>Domain</strong> türünde yalnızca <strong>futmac.com.tr</strong> alanını ekleyin.</li>
+          <li>Google’ın verdiği TXT doğrulama kaydını Natro DNS yönetimine ekleyin; mevcut A ve CNAME kayıtlarını silmeyin.</li>
+          <li>Doğrulama sonrası Site Haritaları bölümüne <strong>https://futmac.com.tr/sitemap.xml</strong> gönderin.</li>
+          <li>Ana sayfayı URL Denetimi bölümünde kontrol edip dizine eklenmesini isteyin.</li>
+        </ol>
+        <p>Search Console kurulumu Google hesabı sahibi tarafından bir kez onaylanmalıdır. Site haritası ve robots dosyası yayında hazırdır.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

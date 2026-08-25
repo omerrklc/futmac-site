@@ -1,5 +1,12 @@
 # FUTMAC Teslim Notu
 
+## 25 Ağustos 2026 — yönetim ve teslim paketi
+
+- Admin paneline doğrudan açılan kapsamlı kullanım rehberi eklendi.
+- Haber yayımlama, gerçek lig verilerini girme, yayın öncesi kontrol, yedekleme, hesap devri ve Search Console adımları tek sayfada toplandı.
+- Rehber arama motorlarından `noindex` ve `robots.txt` ile ayrıldı; yönetim bilgileri içinde parola veya gizli anahtar bulunmuyor.
+- Canlı sağlık testi yönetim rehberinin erişilebilirliğini de kontrol edecek şekilde genişletildi.
+
 ## 25 Ağustos 2026 — HTTPS sonrası üretim izlemesi
 
 - HTTPS sertifikası ve zorunlu HTTPS yönlendirmesi etkinleşti.
