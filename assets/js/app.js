@@ -7,7 +7,29 @@
     }).format(new Date()).toLocaleUpperCase('tr-TR');
   });
   const data = window.FUTMAC_DATA || null;
-  if (window.FUTMAC_REMOTE_READY) await window.FUTMAC_REMOTE_READY;
+  async function waitForRemoteData() {
+    if (!window.FUTMAC_REMOTE_READY) return 'local';
+    let timeoutId;
+    const timeout = new Promise(function (resolve) {
+      timeoutId = window.setTimeout(function () { resolve('timeout'); }, 4500);
+    });
+    const remote = Promise.resolve(window.FUTMAC_REMOTE_READY).then(function () {
+      return 'ready';
+    }).catch(function () {
+      return 'error';
+    });
+    const state = await Promise.race([remote, timeout]);
+    window.clearTimeout(timeoutId);
+    document.documentElement.dataset.remoteState = state;
+    if (state === 'timeout') {
+      remote.then(function (lateState) {
+        document.documentElement.dataset.remoteState = lateState;
+        document.dispatchEvent(new CustomEvent('futmac:remote-settled', { detail: { state: lateState } }));
+      });
+    }
+    return state;
+  }
+  await waitForRemoteData();
   const body = document.body;
   const fileName = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const requestedCategory = new URLSearchParams(window.location.search).get('kategori');
