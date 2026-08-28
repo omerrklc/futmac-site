@@ -79,21 +79,18 @@
       backend.leagueManagementEnabled ? optionalLoad('fikstür', function () { return backend.listFixtures(); }) : Promise.resolve(null)
     ]).then(function (results) {
       const remoteArticles = results[0], remoteCategories = results[1], remoteAuthors = results[2], remoteStandings = results[3], remoteFixtures = results[4];
-      if (remoteArticles) {
-        const remoteSlugs = new Set(remoteArticles.map(function (article) { return article.slug; }));
-        window.FUTMAC_DATA.articles = remoteArticles.concat(window.FUTMAC_DATA.articles.filter(function (article) { return !remoteSlugs.has(article.slug); }));
-      }
+      if (Array.isArray(remoteArticles)) window.FUTMAC_DATA.articles = remoteArticles;
       if (remoteCategories && remoteCategories.length) remoteCategories.forEach(function (category) {
         const current = window.FUTMAC_DATA.categories[category.id] || {};
         window.FUTMAC_DATA.categories[category.id] = Object.assign({}, current, { title:category.name, kicker:current.kicker || category.name.toUpperCase(), description:category.description || current.description || '', active:category.active, showInMenu:category.showInMenu, sortOrder:category.sortOrder || 0 });
       });
       if (remoteAuthors && remoteAuthors.length) window.FUTMAC_DATA.authors = remoteAuthors;
-      if (remoteStandings && remoteStandings.length) {
+      if (Array.isArray(remoteStandings)) {
         window.FUTMAC_DATA.standings = remoteStandings;
         const latest = remoteStandings.map(function (row) { return row.updatedAt; }).filter(Boolean).sort().pop();
         if (latest) window.FUTMAC_DATA.updatedAt = new Intl.DateTimeFormat('tr-TR', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }).format(new Date(latest));
       }
-      if (remoteFixtures && Object.keys(remoteFixtures).length) window.FUTMAC_DATA.fixtures = remoteFixtures;
+      if (remoteFixtures && typeof remoteFixtures === 'object') window.FUTMAC_DATA.fixtures = remoteFixtures;
     });
     return;
   }

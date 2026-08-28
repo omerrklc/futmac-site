@@ -172,3 +172,6 @@ button, select, input { font-family:Tahoma,Verdana,Arial,sans-serif; }
 @media (prefers-reduced-motion:reduce) {
   .match-status.live { animation:none; }
 }
+[data-home-news]{display:contents}
+.breaking .ticker a{color:inherit;text-decoration:none}
+.breaking .ticker a:hover{text-decoration:underline}

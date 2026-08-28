@@ -3,6 +3,7 @@
 
   const config = window.FUTMAC_SUPABASE_CONFIG || {};
   const ARTICLE_FIELDS = 'id,slug,content_type,category_slug,title,excerpt,body,author_name,author_slug,image_url,image_alt,status,read_time,published_at,created_at,updated_at';
+  let editedAuthorOriginalId = '';
   const MANAGED_ARTICLE_FIELDS = ARTICLE_FIELDS + ',created_by';
   let clientPromise = null;
 
@@ -205,10 +206,19 @@
 
   async function listStandings() {
     const client = await getClient();
-    const rows = optionalRows(await client.from('standings').select('team_id,played,won,drawn,lost,fantasy_points,league_points,movement,form,updated_at,team:league_teams!standings_team_id_fkey(id,name,manager,sort_order)').limit(200));
-    if (rows === null) return null;
-    rows.sort(function (a, b) { return b.league_points - a.league_points || b.fantasy_points - a.fantasy_points || (a.team.sort_order || 0) - (b.team.sort_order || 0); });
-    return rows.map(function (row, index) { return { rank: index + 1, teamId: row.team_id, team: row.team.name, manager: row.team.manager, played: row.played, won: row.won, drawn: row.drawn, lost: row.lost, fantasy: row.fantasy_points, points: row.league_points, change: row.movement, form: row.form || [], updatedAt: row.updated_at }; });
+    const results = await Promise.all([
+      client.from('standings').select('team_id,played,won,drawn,lost,fantasy_points,league_points,movement,form,updated_at').limit(200),
+      client.from('league_teams').select('id,name,manager,sort_order,is_active').eq('is_active', true).order('sort_order').order('name').limit(200)
+    ]);
+    const rows = optionalRows(results[0]), teamRows = optionalRows(results[1]);
+    if (rows === null || teamRows === null) return null;
+    const byTeam = new Map(rows.map(function (row) { return [row.team_id, row]; }));
+    const merged = teamRows.map(function (team) {
+      const saved = byTeam.get(team.id) || {};
+      return { team_id:team.id, played:saved.played || 0, won:saved.won || 0, drawn:saved.drawn || 0, lost:saved.lost || 0, fantasy_points:saved.fantasy_points || 0, league_points:saved.league_points || 0, movement:saved.movement || 'same', form:saved.form || [], updated_at:saved.updated_at || null, team:team };
+    });
+    merged.sort(function (a, b) { return b.league_points - a.league_points || b.fantasy_points - a.fantasy_points || (a.team.sort_order || 0) - (b.team.sort_order || 0); });
+    return merged.map(function (row, index) { return { rank: index + 1, teamId: row.team_id, team: row.team.name, manager: row.team.manager, played: row.played, won: row.won, drawn: row.drawn, lost: row.lost, fantasy: row.fantasy_points, points: row.league_points, change: row.movement, form: row.form || [], updatedAt: row.updated_at }; });
   }
 
   async function listFixtures() {
@@ -246,8 +256,22 @@
   async function saveAuthor(author) {
     const client = await getClient();
     const row = { slug:author.id, name:author.name, role:author.role, bio:author.bio, image_url:author.image, is_active:author.active, sort_order:author.sortOrder };
-    const result = await client.from('authors').upsert(row, { onConflict:'slug' }).select().single(); if (result.error) throw result.error; return result.data;
+    const originalId = author.originalId || editedAuthorOriginalId || author.id;
+    if (originalId === author.id) {
+      const result = await client.from('authors').upsert(row, { onConflict:'slug' }).select().single(); if (result.error) throw result.error; editedAuthorOriginalId = ''; return result.data;
+    }
+    const changed = await client.from('authors').update(row).eq('slug', originalId).select().single();
+    if (changed.error) throw changed.error;
+    const linked = await client.from('articles').update({ author_slug:author.id, author_name:author.name }).eq('author_slug', originalId);
+    if (linked.error) {
+      await client.from('authors').update({ slug:originalId }).eq('slug', author.id);
+      throw linked.error;
+    }
+    editedAuthorOriginalId = '';
+    return changed.data;
   }
+
+  function setAuthorOriginalId(id) { editedAuthorOriginalId = id || ''; }
 
   async function saveTeam(team) {
     const client = await getClient();
@@ -384,7 +408,7 @@
     signOut: signOut, requestPasswordReset: requestPasswordReset, updatePassword: updatePassword,
     listArticles: listArticles, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
     listAuthors: listAuthors, listTeams: listTeams, listStandings: listStandings, listFixtures: listFixtures,
-    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, saveAuthor: saveAuthor,
+    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, saveAuthor: saveAuthor, setAuthorOriginalId: setAuthorOriginalId,
     saveTeam: saveTeam, deleteTeam: deleteTeam, saveCategory: saveCategory, deleteCategory: deleteCategory,
     listProfiles: listProfiles, saveProfile: saveProfile, listAuditLogs: listAuditLogs, healthCheck: healthCheck,
     uploadImage: uploadImage

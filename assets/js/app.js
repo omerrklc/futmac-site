@@ -275,13 +275,26 @@
   }
 
   function renderLocalHomepage() {
-    const stream = document.querySelector('.portal-stream');
-    if (!stream || !data) return;
-    const mainStory = stream.querySelector('.portal-main-story');
-    const localItems = data.articles.filter(function (item) { return (item.local || item.remote || item.dynamic) && item.status === 'published'; }).slice(0, 3);
-    localItems.reverse().forEach(function (article) {
-      mainStory.insertAdjacentHTML('afterend', '<article class="portal-news"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.title) + '"><div><span>YENİ · ' + escapeHtml(categoryName(article.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>');
-    });
+    const homeNews = document.querySelector('[data-home-news]');
+    if (!homeNews || !data) return;
+    const items = data.articles.filter(function (item) { return item.status === 'published'; });
+    if (!items.length) homeNews.innerHTML = '<div class="state-panel"><strong>Henüz yayımlanmış haber yok.</strong><span>Yönetim panelinden yayımlanan ilk haber burada görünecek.</span></div>';
+    else {
+      const lead = items[0];
+      homeNews.innerHTML = '<article class="portal-main-story"><a href="' + escapeHtml(lead.url) + '"><img src="' + escapeHtml(lead.image) + '" alt="' + escapeHtml(lead.imageAlt || lead.title) + '"></a><div><span>' + escapeHtml(categoryName(lead.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(lead.url) + '">' + escapeHtml(lead.title) + '</a></h2><p>' + escapeHtml(lead.excerpt) + '</p><a class="portal-more" href="' + escapeHtml(lead.url) + '">Haberi oku »</a></div></article>' + items.slice(1).map(function (article) { return '<article class="portal-news"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"><div><span>' + escapeHtml(categoryName(article.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>'; }).join('');
+    }
+    const latest = items.slice(0, 5);
+    const ticker = document.querySelector('[data-breaking-ticker]');
+    if (ticker) ticker.innerHTML = latest.length ? latest.map(function (article, index) { return (index ? '<i>•</i>' : '') + '<a href="' + escapeHtml(article.url) + '"><span>' + escapeHtml(article.title) + '</span></a>'; }).join('') : '<span>Henüz yayımlanmış haber yok.</span>';
+    const latestList = document.querySelector('[data-latest-news]');
+    if (latestList) latestList.innerHTML = latest.length ? latest.map(function (article) { return '<li><time>' + escapeHtml(article.time || '--:--') + '</time><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></li>'; }).join('') : '<li>Henüz haber yok.</li>';
+    const recentList = document.querySelector('[data-recent-news]');
+    if (recentList) recentList.innerHTML = latest.length ? latest.map(function (article) { return '<li><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></li>'; }).join('') : '<li>Henüz haber yok.</li>';
+    const fixtureList = document.querySelector('[data-upcoming-matches]');
+    if (fixtureList) {
+      const matches = Object.keys(data.fixtures || {}).reduce(function (all, week) { return all.concat((data.fixtures[week] || []).map(function (match) { return Object.assign({ week:week }, match); })); }, []).filter(function (match) { return match.status !== 'finished'; }).sort(function (a, b) { return String(a.kickoffAt || a.date).localeCompare(String(b.kickoffAt || b.date)); }).slice(0, 5);
+      fixtureList.innerHTML = matches.length ? matches.map(function (match) { const label = match.status === 'live' ? 'CANLI' : String(match.date || '').replace(/\s+\d{4}$/, ''); return '<li><time>' + escapeHtml(label) + '</time><a href="fikstur.html?hafta=' + encodeURIComponent(match.week) + '">' + escapeHtml(match.home + ' - ' + match.away) + '</a></li>'; }).join('') : '<li>Henüz yaklaşan maç eklenmedi.</li>';
+    }
   }
 
   renderLocalArticle();
