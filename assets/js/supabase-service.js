@@ -197,6 +197,23 @@
     });
   }
 
+  async function getSiteSettings() {
+    const client = await getClient();
+    const result = await client.from('site_settings').select('settings,updated_at').eq('id', true).maybeSingle();
+    if (result.error) {
+      const missing = optionalRows(result);
+      if (missing === null) return null;
+    }
+    return result.data ? Object.assign({}, result.data.settings || {}, { updatedAt:result.data.updated_at }) : {};
+  }
+
+  async function saveSiteSettings(settings) {
+    const client = await getClient();
+    const result = await client.from('site_settings').upsert({ id:true, settings:settings }, { onConflict:'id' }).select('settings,updated_at').single();
+    if (result.error) throw result.error;
+    return Object.assign({}, result.data.settings || {}, { updatedAt:result.data.updated_at });
+  }
+
   async function listTeams() {
     const client = await getClient();
     const rows = optionalRows(await client.from('league_teams').select('*').order('sort_order').order('name').limit(200));
@@ -269,6 +286,15 @@
     }
     editedAuthorOriginalId = '';
     return changed.data;
+  }
+
+  async function deleteAuthor(id) {
+    const client = await getClient();
+    const linked = await client.from('articles').select('id', { count:'exact', head:true }).eq('author_slug', id);
+    if (linked.error) throw linked.error;
+    if ((linked.count || 0) > 0) throw new Error('author_has_articles');
+    const result = await client.from('authors').delete().eq('slug', id);
+    if (result.error) throw result.error;
   }
 
   function setAuthorOriginalId(id) { editedAuthorOriginalId = id || ''; }
@@ -408,7 +434,8 @@
     signOut: signOut, requestPasswordReset: requestPasswordReset, updatePassword: updatePassword,
     listArticles: listArticles, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
     listAuthors: listAuthors, listTeams: listTeams, listStandings: listStandings, listFixtures: listFixtures,
-    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, saveAuthor: saveAuthor, setAuthorOriginalId: setAuthorOriginalId,
+    getSiteSettings: getSiteSettings, saveSiteSettings: saveSiteSettings,
+    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, saveAuthor: saveAuthor, deleteAuthor: deleteAuthor, setAuthorOriginalId: setAuthorOriginalId,
     saveTeam: saveTeam, deleteTeam: deleteTeam, saveCategory: saveCategory, deleteCategory: deleteCategory,
     listProfiles: listProfiles, saveProfile: saveProfile, listAuditLogs: listAuditLogs, healthCheck: healthCheck,
     uploadImage: uploadImage

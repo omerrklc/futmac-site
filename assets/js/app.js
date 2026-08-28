@@ -108,6 +108,30 @@
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char];
     });
   }
+
+  function applySiteSettings() {
+    const settings = data && data.siteSettings;
+    if (!settings) return;
+    const wordmark = document.querySelector('.wordmark');
+    if (wordmark) wordmark.innerHTML = escapeHtml(settings.siteName || 'FUTMAC') + '<small>' + escapeHtml(settings.tagline || '') + '</small>';
+    const issue = document.querySelector('.header-meta strong'); if (issue) issue.textContent = settings.issueLabel || '';
+    const season = document.querySelector('.header-meta span'); if (season) season.textContent = settings.seasonLabel || '';
+    document.querySelectorAll('.footer-inner div span').forEach(function (item) { item.textContent = settings.footerText || ''; });
+    const rule = document.querySelector('.budget-rule-highlight');
+    if (rule) { rule.hidden = settings.ruleBannerVisible === false; rule.href = settings.ruleLink || 'kurallar.html'; const title=rule.querySelector('strong'),text=rule.querySelector('span'),label=rule.querySelector('b'); if(title)title.textContent=settings.ruleTitle||'';if(text)text.textContent=settings.ruleText||'';if(label)label.textContent=settings.ruleLinkLabel||''; }
+    const breaking = document.querySelector('.breaking'); if (breaking) breaking.hidden = settings.breakingVisible === false;
+    const writers = document.querySelector('.portal-writers'); if (writers) writers.hidden = settings.writersVisible === false;
+    const homeNews = document.querySelector('[data-home-news]'); if (homeNews) homeNews.hidden = settings.mainNewsVisible === false;
+    const sectionFor = function (selector) { const child=document.querySelector(selector); return child && child.closest('.portal-widget'); };
+    const standings=sectionFor('[data-standings-body][data-compact]');if(standings)standings.hidden=settings.standingsVisible===false;
+    const upcoming=sectionFor('[data-upcoming-matches]');if(upcoming)upcoming.hidden=settings.upcomingVisible===false;
+    const latest=sectionFor('[data-latest-news]');if(latest)latest.hidden=settings.latestVisible===false;
+    const recent=sectionFor('[data-recent-news]');if(recent)recent.hidden=settings.recentVisible===false;
+    const matchCenter=document.querySelector('[data-match-center]');if(matchCenter)matchCenter.hidden=settings.matchCenterVisible===false;
+    const promo=document.querySelector('.portal-promo');if(promo){promo.href=settings.promoLink||'kurallar.html';const promoTitle=promo.querySelector('strong'),promoText=promo.querySelector('span');if(promoTitle)promoTitle.textContent=settings.promoTitle||'';if(promoText)promoText.textContent=settings.promoText||'';}
+    if(matchCenter){matchCenter.href=settings.matchCenterLink||'fikstur.html';const centerTitle=matchCenter.querySelector('strong');if(centerTitle)centerTitle.textContent=settings.matchCenterTitle||'';}
+  }
+  applySiteSettings();
   function categoryName(key) { return data && data.categories[key] ? data.categories[key].title : key; }
   function articleRow(article) {
  return '<article class="news-row"><a href="' + escapeHtml(article.url) + '"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"></a><div><div class="news-row__meta"><b>' + escapeHtml(categoryName(article.category).toUpperCase()) + '</b><time datetime="' + escapeHtml(article.date) + '">' + escapeHtml(article.displayDate) + ' · ' + escapeHtml(article.time) + '</time><span>' + escapeHtml(article.readTime) + '</span></div><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>';
@@ -278,6 +302,15 @@
     const homeNews = document.querySelector('[data-home-news]');
     if (!homeNews || !data) return;
     const items = data.articles.filter(function (item) { return item.status === 'published'; });
+    const writerStrip = document.querySelector('.portal-writers');
+    if (writerStrip && Array.isArray(data.authors)) {
+      writerStrip.querySelectorAll('article').forEach(function (item) { item.remove(); });
+      data.authors.filter(function (author) { return author.active !== false; }).forEach(function (author) {
+        const latestArticle = items.find(function (article) { return article.authorId === author.id || article.author === author.name; });
+        writerStrip.insertAdjacentHTML('beforeend','<article><div><strong>'+escapeHtml(author.name)+'</strong><span>'+escapeHtml(author.role || 'YAZAR')+'</span><a href="'+escapeHtml(latestArticle ? latestArticle.url : author.profile || 'yazarlar.html')+'">'+escapeHtml(latestArticle ? latestArticle.title : 'Yazar profili ve yazıları')+'</a></div><img src="'+escapeHtml(author.image)+'" alt="'+escapeHtml(author.name)+'"></article>');
+      });
+      if (!writerStrip.querySelector('article')) writerStrip.hidden = true;
+    }
     if (!items.length) homeNews.innerHTML = '<div class="state-panel"><strong>Henüz yayımlanmış haber yok.</strong><span>Yönetim panelinden yayımlanan ilk haber burada görünecek.</span></div>';
     else {
       const lead = items[0];

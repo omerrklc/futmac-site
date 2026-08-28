@@ -76,9 +76,10 @@
       optionalLoad('kategori', function () { return backend.listCategories(); }),
       backend.leagueManagementEnabled ? optionalLoad('yazar', function () { return backend.listAuthors(); }) : Promise.resolve(null),
       backend.leagueManagementEnabled ? optionalLoad('puan durumu', function () { return backend.listStandings(); }) : Promise.resolve(null),
-      backend.leagueManagementEnabled ? optionalLoad('fikstür', function () { return backend.listFixtures(); }) : Promise.resolve(null)
+      backend.leagueManagementEnabled ? optionalLoad('fikstür', function () { return backend.listFixtures(); }) : Promise.resolve(null),
+      backend.getSiteSettings ? optionalLoad('site ayarı', function () { return backend.getSiteSettings(); }) : Promise.resolve(null)
     ]).then(function (results) {
-      const remoteArticles = results[0], remoteCategories = results[1], remoteAuthors = results[2], remoteStandings = results[3], remoteFixtures = results[4];
+      const remoteArticles = results[0], remoteCategories = results[1], remoteAuthors = results[2], remoteStandings = results[3], remoteFixtures = results[4], remoteSettings = results[5];
       if (Array.isArray(remoteArticles)) window.FUTMAC_DATA.articles = remoteArticles;
       if (remoteCategories && remoteCategories.length) remoteCategories.forEach(function (category) {
         const current = window.FUTMAC_DATA.categories[category.id] || {};
@@ -91,6 +92,7 @@
         if (latest) window.FUTMAC_DATA.updatedAt = new Intl.DateTimeFormat('tr-TR', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }).format(new Date(latest));
       }
       if (remoteFixtures && typeof remoteFixtures === 'object') window.FUTMAC_DATA.fixtures = remoteFixtures;
+      if (remoteSettings && typeof remoteSettings === 'object') window.FUTMAC_DATA.siteSettings = remoteSettings;
     });
     return;
   }
