@@ -11,10 +11,13 @@ const response = await fetch(projectUrl + '/rest/v1/articles?select=id,title,exc
 if (!response.ok) throw new Error('Yayımlanmış haberler alınamadı: ' + response.status);
 const articles = await response.json();
 const output = path.join(root, 'haber');
+const mediaOutput = path.join(root, 'haber-media');
 await mkdir(output, { recursive:true });
+await mkdir(mediaOutput, { recursive:true });
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
 const expected = new Set();
+const expectedMedia = new Set();
 for (const article of articles) {
   if (!/^[0-9a-f-]{36}$/i.test(article.id)) continue;
   const fileName = article.id + '.html';
@@ -22,7 +25,21 @@ for (const article of articles) {
   const shareUrl = 'https://futmac.com.tr/haber/' + fileName;
   const title = escape(article.title + ' | FUTMAC');
   const description = escape(article.excerpt || 'FUTMAC haber merkezi içeriği.');
-  const image = escape(article.image_url || 'https://futmac.com.tr/assets/images/logo/emac-turka.png');
+  let socialImage = article.image_url || 'https://futmac.com.tr/assets/images/logo/emac-turka.png';
+  let socialImageType = socialImage.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+  const storagePrefix = projectUrl + '/storage/v1/object/public/futmac-media/';
+  if (socialImage.startsWith(storagePrefix)) {
+    const transformed = socialImage.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=1200&height=630&resize=cover&quality=50';
+    const imageResponse = await fetch(transformed, { headers:{ Accept:'image/webp,image/*' } });
+    if (imageResponse.ok && String(imageResponse.headers.get('content-type')).includes('image/webp')) {
+      const mediaName = article.id + '.webp';
+      await writeFile(path.join(mediaOutput, mediaName), Buffer.from(await imageResponse.arrayBuffer()));
+      expectedMedia.add(mediaName);
+      socialImage = 'https://futmac.com.tr/haber-media/' + mediaName;
+      socialImageType = 'image/webp';
+    }
+  }
+  const image = escape(socialImage);
   const imageAlt = escape(article.image_alt || article.title);
   const published = escape(article.published_at || '');
   const html = `<!doctype html>
@@ -33,7 +50,8 @@ for (const article of articles) {
 <link rel="canonical" href="${shareUrl}">
 <meta property="og:type" content="article"><meta property="og:site_name" content="FUTMAC">
 <meta property="og:title" content="${title}"><meta property="og:description" content="${description}">
-<meta property="og:url" content="${shareUrl}"><meta property="og:image" content="${image}"><meta property="og:image:alt" content="${imageAlt}">
+<meta property="og:url" content="${shareUrl}"><meta property="og:image" content="${image}"><meta property="og:image:secure_url" content="${image}">
+<meta property="og:image:type" content="${socialImageType}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${imageAlt}">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${title}">
 <meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${image}">
 <meta property="article:published_time" content="${published}">
@@ -52,5 +70,8 @@ for (const article of articles) {
 
 for (const entry of await readdir(output, { withFileTypes:true })) {
   if (entry.isFile() && entry.name.endsWith('.html') && !expected.has(entry.name)) await rm(path.join(output, entry.name));
+}
+for (const entry of await readdir(mediaOutput, { withFileTypes:true })) {
+  if (entry.isFile() && !expectedMedia.has(entry.name)) await rm(path.join(mediaOutput, entry.name));
 }
 console.log(articles.length + ' sosyal paylaşım sayfası hazırlandı.');
