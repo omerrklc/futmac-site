@@ -63,7 +63,7 @@
       status: scheduled ? 'scheduled' : row.status,
       readTime: row.read_time || '3 dk',
       ownerId: row.created_by || null,
-      url: 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
+      url: row.status === 'published' ? 'haber/' + encodeURIComponent(row.id) + '.html' : 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
       remote: true
     };
   }
