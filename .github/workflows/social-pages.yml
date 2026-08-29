@@ -1,0 +1,43 @@
+name: FUTMAC Social Preview Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate-social-pages.mjs'
+      - '.github/workflows/social-pages.yml'
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: futmac-social-pages
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+      - name: Node.js hazırla
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Paylaşım sayfalarını üret
+        run: node scripts/generate-social-pages.mjs
+      - name: Değişiklikleri yayın kaynağına kaydet
+        run: |
+          if git diff --quiet -- haber; then
+            echo "Paylaşım sayfaları güncel."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add haber
+          git commit -m "Update social preview pages"
+          git push
