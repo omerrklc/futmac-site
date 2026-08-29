@@ -270,6 +270,22 @@
     const result = await client.from('standings').upsert(row, { onConflict:'team_id' }).select().single(); if (result.error) throw result.error; return result.data;
   }
 
+  async function ensureStandingsForTeams() {
+    const client = await getClient();
+    const results = await Promise.all([
+      client.from('league_teams').select('id').eq('is_active', true).limit(200),
+      client.from('standings').select('team_id').limit(200)
+    ]);
+    if (results[0].error) throw results[0].error;
+    if (results[1].error) throw results[1].error;
+    const existing = new Set((results[1].data || []).map(function (row) { return row.team_id; }));
+    const missing = (results[0].data || []).filter(function (team) { return !existing.has(team.id); }).map(function (team) { return { team_id:team.id }; });
+    if (!missing.length) return 0;
+    const inserted = await client.from('standings').upsert(missing, { onConflict:'team_id', ignoreDuplicates:true });
+    if (inserted.error) throw inserted.error;
+    return missing.length;
+  }
+
   async function saveAuthor(author) {
     const client = await getClient();
     const row = { slug:author.id, name:author.name, role:author.role, bio:author.bio, image_url:author.image, is_active:author.active, sort_order:author.sortOrder };
@@ -435,7 +451,7 @@
     listArticles: listArticles, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
     listAuthors: listAuthors, listTeams: listTeams, listStandings: listStandings, listFixtures: listFixtures,
     getSiteSettings: getSiteSettings, saveSiteSettings: saveSiteSettings,
-    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, saveAuthor: saveAuthor, deleteAuthor: deleteAuthor, setAuthorOriginalId: setAuthorOriginalId,
+    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, ensureStandingsForTeams: ensureStandingsForTeams, saveAuthor: saveAuthor, deleteAuthor: deleteAuthor, setAuthorOriginalId: setAuthorOriginalId,
     saveTeam: saveTeam, deleteTeam: deleteTeam, saveCategory: saveCategory, deleteCategory: deleteCategory,
     listProfiles: listProfiles, saveProfile: saveProfile, listAuditLogs: listAuditLogs, healthCheck: healthCheck,
     uploadImage: uploadImage
