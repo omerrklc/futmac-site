@@ -286,7 +286,7 @@
       try { article = JSON.parse(sessionStorage.getItem('futmac_admin_preview_v1') || 'null'); } catch (error) { article = null; }
       if (aside) aside.innerHTML = '<section class="side-module"><h2>ÖNİZLEME</h2><p style="padding:8px">Bu görünüm yalnızca hazırladığınız içeriği kontrol etmek içindir.</p><a href="admin.html">Yönetim paneline dön »</a></section>';
     } else {
-      const pathMatch = window.location.pathname.match(/\/haber\/([0-9a-f-]{36})\.html$/i);
+      const pathMatch = window.location.pathname.match(/\/(?:haber|paylas)\/([0-9a-f-]{36})(?:-[a-z0-9]+)?\.html$/i);
       const id = params.get('id') || (pathMatch && pathMatch[1]);
       article = data.articles.find(function (item) { return (item.local || item.remote || item.dynamic) && item.id === id; }) || null;
     }
@@ -365,9 +365,9 @@
     if (!tag) { tag = document.createElement('meta'); tag.setAttribute(isName ? 'name' : 'property', property); document.head.appendChild(tag); } tag.setAttribute('content', content);
   }
   const canonicalBase = 'https://futmac.com.tr/'; let canonical = document.head.querySelector('link[rel="canonical"]');
-  const socialPathMatch = window.location.pathname.match(/\/haber\/([0-9a-f-]{36})\.html$/i);
+  const socialPathMatch = window.location.pathname.match(/\/(?:haber|paylas)\/([0-9a-f-]{36})(?:-[a-z0-9]+)?\.html$/i);
   const dynamicId = fileName === 'haber-onizleme.html' ? new URLSearchParams(window.location.search).get('id') : socialPathMatch && socialPathMatch[1];
-  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); } canonical.href = socialPathMatch ? canonicalBase + 'haber/' + encodeURIComponent(dynamicId) + '.html' : canonicalBase + fileName + (dynamicId ? '?id=' + encodeURIComponent(dynamicId) : '');
+  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); } canonical.href = socialPathMatch ? window.location.origin + window.location.pathname : canonicalBase + fileName + (dynamicId ? '?id=' + encodeURIComponent(dynamicId) : '');
   const description = (document.head.querySelector('meta[name="description"]') || {}).content || 'E-Mac Turka Fantazi Ligi haberleri ve lig merkezi.';
   const renderedHero = document.querySelector('.article-hero'); const socialImage = renderedHero ? new URL(renderedHero.getAttribute('src'), document.baseURI).href : canonicalBase + 'assets/images/logo/emac-turka.png';
   ensureMeta('og:title', document.title, false); ensureMeta('og:description', description, false); ensureMeta('og:type', body.dataset.schema === 'article' ? 'article' : 'website', false); ensureMeta('og:url', canonical.href, false); ensureMeta('og:image', socialImage, false); ensureMeta('twitter:card', 'summary_large_image', true); ensureMeta('twitter:title', document.title, true); ensureMeta('twitter:description', description, true); ensureMeta('twitter:image', socialImage, true);
