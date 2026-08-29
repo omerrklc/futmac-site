@@ -45,6 +45,7 @@
   function rowToArticle(row) {
     const published = row.published_at ? new Date(row.published_at) : new Date(row.updated_at || row.created_at);
     const scheduled = row.status === 'published' && published.getTime() > Date.now();
+    const shareVersion = Math.max(0, new Date(row.updated_at || row.published_at || row.created_at || 0).getTime()).toString(36);
     return {
       id: row.id,
       slug: row.slug,
@@ -63,7 +64,7 @@
       status: scheduled ? 'scheduled' : row.status,
       readTime: row.read_time || '3 dk',
       ownerId: row.created_by || null,
-      url: row.status === 'published' ? 'haber/' + encodeURIComponent(row.id) + '.html' : 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
+      url: row.status === 'published' ? 'paylas/' + encodeURIComponent(row.id) + '-' + shareVersion + '.html' : 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
       remote: true
     };
   }

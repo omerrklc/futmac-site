@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -8,22 +8,28 @@ const projectUrl = process.env.FUTMAC_SUPABASE_URL || configSource.match(/url:\s
 const publicKey = process.env.FUTMAC_SUPABASE_KEY || configSource.match(/publishableKey:\s*'([^']+)'/)?.[1];
 if (!projectUrl || !publicKey) throw new Error('Supabase genel bağlantı bilgileri bulunamadı.');
 
-const response = await fetch(projectUrl + '/rest/v1/articles?select=id,title,excerpt,image_url,image_alt,published_at,status&status=eq.published&order=published_at.desc', { headers:{ apikey:publicKey } });
+const response = await fetch(projectUrl + '/rest/v1/articles?select=id,title,excerpt,image_url,image_alt,published_at,updated_at,status&status=eq.published&order=published_at.desc', { headers:{ apikey:publicKey } });
 if (!response.ok) throw new Error('Yayımlanmış haberler alınamadı: ' + response.status);
 const articles = await response.json();
 const output = path.join(root, 'haber');
+const shareOutput = path.join(root, 'paylas');
 const mediaOutput = path.join(root, 'haber-media');
 await mkdir(output, { recursive:true });
+await mkdir(shareOutput, { recursive:true });
 await mkdir(mediaOutput, { recursive:true });
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
 const expected = new Set();
+const expectedShares = new Set();
 const expectedMedia = new Set();
 for (const article of articles) {
   if (!/^[0-9a-f-]{36}$/i.test(article.id)) continue;
   const fileName = article.id + '.html';
   expected.add(fileName);
-  const shareUrl = 'https://futmac.com.tr/haber/' + fileName;
+  const shareVersion = Math.max(0, new Date(article.updated_at || article.published_at || 0).getTime()).toString(36);
+  const shareFileName = article.id + '-' + shareVersion + '.html';
+  expectedShares.add(shareFileName);
+  const shareUrl = 'https://futmac.com.tr/paylas/' + shareFileName;
   const title = escape(article.title + ' | FUTMAC');
   const description = escape(article.excerpt || 'FUTMAC haber merkezi içeriği.');
   let socialImage = article.image_url || 'https://futmac.com.tr/assets/images/logo/emac-turka.png';
@@ -38,7 +44,10 @@ for (const article of articles) {
       const webpPath = path.join(mediaOutput, webpName);
       const jpgPath = path.join(mediaOutput, jpgName);
       await writeFile(webpPath, Buffer.from(await imageResponse.arrayBuffer()));
-      const conversion = spawnSync('convert', [webpPath, '-strip', '-quality', '78', jpgPath], { stdio:'inherit' });
+      let conversion = { status:1 };
+      if (process.platform === 'win32') {
+        try { await access(jpgPath); conversion={ status:0 }; } catch {}
+      } else conversion = spawnSync('convert', [webpPath, '-strip', '-quality', '78', jpgPath], { stdio:'inherit' });
       if (conversion.status === 0) {
         await rm(webpPath);
         expectedMedia.add(jpgName);
@@ -55,11 +64,12 @@ for (const article of articles) {
   const imageAlt = escape(article.image_alt || article.title);
   const published = escape(article.published_at || '');
   const html = `<!doctype html>
-<html lang="tr"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://pwmwymvnyfvrumlizbuw.supabase.co wss://pwmwymvnyfvrumlizbuw.supabase.co; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<html lang="tr" prefix="og: https://ogp.me/ns# article: https://ogp.me/ns/article#"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://pwmwymvnyfvrumlizbuw.supabase.co wss://pwmwymvnyfvrumlizbuw.supabase.co; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <base href="/">
 <title>${title}</title><meta name="description" content="${description}">
 <link rel="canonical" href="${shareUrl}">
+<link rel="image_src" href="${image}"><meta itemprop="image" content="${image}">
 <meta property="og:type" content="article"><meta property="og:site_name" content="FUTMAC">
 <meta property="og:title" content="${title}"><meta property="og:description" content="${description}">
 <meta property="og:url" content="${shareUrl}"><meta property="og:image" content="${image}"><meta property="og:image:secure_url" content="${image}">
@@ -78,10 +88,14 @@ for (const article of articles) {
 <footer><div class="wrap footer-inner"><img src="assets/images/logo/emac-turka-transparent.png" alt=""><div><strong>FUTMAC</strong><span>© 2026 E-Mac Turka'nın Spor Gazetesi</span></div><nav><a href="index.html">Ana Sayfa</a></nav></div></footer>
 </body></html>\n`;
   await writeFile(path.join(output, fileName), html, 'utf8');
+  await writeFile(path.join(shareOutput, shareFileName), html, 'utf8');
 }
 
 for (const entry of await readdir(output, { withFileTypes:true })) {
   if (entry.isFile() && entry.name.endsWith('.html') && !expected.has(entry.name)) await rm(path.join(output, entry.name));
+}
+for (const entry of await readdir(shareOutput, { withFileTypes:true })) {
+  if (entry.isFile() && entry.name.endsWith('.html') && !expectedShares.has(entry.name)) await rm(path.join(shareOutput, entry.name));
 }
 for (const entry of await readdir(mediaOutput, { withFileTypes:true })) {
   if (entry.isFile() && !expectedMedia.has(entry.name)) await rm(path.join(mediaOutput, entry.name));
