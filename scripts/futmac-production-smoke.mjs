@@ -64,8 +64,14 @@ try {
   await textCheck('Ana sayfa', new URL('index.html', SITE), 'FUTMAC');
   await textCheck('Admin noindex', new URL('admin.html', SITE), 'noindex,nofollow');
   await textCheck('Yönetim rehberi', new URL('yonetim-rehberi.html', SITE), 'FUTMAC YÖNETİM REHBERİ');
-  await textCheck('Site haritası', new URL('sitemap.xml', SITE), '<urlset');
+  const sitemap = await textCheck('Site haritası', new URL('sitemap.xml', SITE), '<urlset');
+  record('Demo içerikler site haritasından kaldırıldı', !sitemap.includes('haber-derbi.html') && !sitemap.includes('yazi-eray.html') && !sitemap.includes('futmac-yayinda'), 'Eski örnek adres bulunmuyor');
+  record('Gerçek haberler site haritasında', sitemap.includes('/paylas/'), 'Paylaşım sayfaları listeleniyor');
+  record('Dinamik yazar profilleri site haritasında', sitemap.includes('/yazar.html?id='), 'Yazar profilleri listeleniyor');
   await textCheck('Kök robots.txt', new URL('../robots.txt', SITE), 'Sitemap:');
+  await textCheck('Hakkımızda sayfası', new URL('hakkimizda.html', SITE), '<h1>Hakkımızda</h1>');
+  await textCheck('İletişim sayfası', new URL('iletisim.html', SITE), '<h1>İletişim</h1>');
+  await textCheck('Gizlilik sayfası', new URL('gizlilik.html', SITE), '<h1>Gizlilik ve kişisel veriler</h1>');
   await textCheck('Dinamik haber indeksleme kodu', new URL('assets/js/app.js', SITE), "article.status === 'published' ? 'index,follow'");
 
   const configText = await textCheck('Supabase yapılandırması', new URL('assets/js/supabase-config.js', SITE), 'FUTMAC_SUPABASE_CONFIG');

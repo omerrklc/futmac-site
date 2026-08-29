@@ -2,7 +2,8 @@
   'use strict';
 
   const config = window.FUTMAC_SUPABASE_CONFIG || {};
-  const ARTICLE_FIELDS = 'id,slug,content_type,category_slug,title,excerpt,body,author_name,author_slug,image_url,image_alt,status,read_time,published_at,created_at,updated_at';
+  const ARTICLE_FIELDS = 'id,slug,content_type,category_slug,title,excerpt,body,author_name,author_slug,image_url,image_alt,status,read_time,view_count,published_at,created_at,updated_at';
+  const LEGACY_ARTICLE_FIELDS = ARTICLE_FIELDS.replace(',view_count', '');
   let editedAuthorOriginalId = '';
   const MANAGED_ARTICLE_FIELDS = ARTICLE_FIELDS + ',created_by';
   let clientPromise = null;
@@ -63,6 +64,7 @@
       imageAlt: row.image_alt || '',
       status: scheduled ? 'scheduled' : row.status,
       readTime: row.read_time || '3 dk',
+      viewCount: Number(row.view_count || 0),
       ownerId: row.created_by || null,
       url: row.status === 'published' ? 'paylas/' + encodeURIComponent(row.id) + '-' + shareVersion + '.html' : 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
       remote: true
@@ -154,12 +156,73 @@
     const client = await getClient();
     const requestedLimit = Number(options && options.limit);
     const limit = Math.min(Math.max(Number.isFinite(requestedLimit) ? requestedLimit : (options && options.publishedOnly ? 200 : 500), 1), 500);
-    const fields = options && options.publishedOnly ? ARTICLE_FIELDS : MANAGED_ARTICLE_FIELDS;
+    const fields = options && options.publishedOnly ? (config.analyticsEnabled === true ? ARTICLE_FIELDS : LEGACY_ARTICLE_FIELDS) : (config.analyticsEnabled === true ? MANAGED_ARTICLE_FIELDS : LEGACY_ARTICLE_FIELDS + ',created_by');
     let query = client.from('articles').select(fields).order('published_at', { ascending: false, nullsFirst: false }).order('updated_at', { ascending: false }).limit(limit);
     if (options && options.publishedOnly) query = query.eq('status', 'published').lte('published_at', new Date().toISOString());
-    const result = await query;
+    let result = await query;
+    if (result.error && result.error.code === '42703') {
+      let fallback = client.from('articles').select(options && options.publishedOnly ? LEGACY_ARTICLE_FIELDS : MANAGED_ARTICLE_FIELDS.replace(',view_count','')).order('published_at', { ascending:false, nullsFirst:false }).order('updated_at', { ascending:false }).limit(limit);
+      if (options && options.publishedOnly) fallback = fallback.eq('status','published').lte('published_at',new Date().toISOString());
+      result = await fallback;
+    }
     if (result.error) throw result.error;
     return result.data.map(rowToArticle);
+  }
+
+  async function getMfaStatus() {
+    const client = await getClient();
+    const factors = await client.auth.mfa.listFactors();
+    if (factors.error) throw factors.error;
+    const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assurance.error) throw assurance.error;
+    return { factors:(factors.data && factors.data.totp) || [], currentLevel:assurance.data.currentLevel, nextLevel:assurance.data.nextLevel };
+  }
+
+  async function enrollTotp() {
+    const client = await getClient();
+    const result = await client.auth.mfa.enroll({ factorType:'totp', friendlyName:'FUTMAC Yönetim Paneli' });
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function verifyTotp(factorId, code) {
+    const client = await getClient();
+    const challenge = await client.auth.mfa.challenge({ factorId:factorId });
+    if (challenge.error) throw challenge.error;
+    const result = await client.auth.mfa.verify({ factorId:factorId, challengeId:challenge.data.id, code:String(code || '').replace(/\s/g,'') });
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function trackArticleView(id) {
+    if (config.analyticsEnabled !== true) return null;
+    if (!/^[0-9a-f-]{36}$/i.test(String(id || ''))) return null;
+    const client = await getClient();
+    const result = await client.rpc('record_article_view', { article_id:id });
+    if (result.error) {
+      if (['PGRST202','42883'].includes(result.error.code) || String(result.error.message || '').includes('record_article_view')) return null;
+      throw result.error;
+    }
+    return result.data;
+  }
+
+  async function trackPageView(path, referrer) {
+    if (config.analyticsEnabled !== true) return null;
+    const client = await getClient();
+    const result = await client.rpc('record_page_view', { page_path:String(path || '/').slice(0,180), referrer_host:String(referrer || 'direct').slice(0,120) });
+    if (result.error) throw result.error;
+    return true;
+  }
+
+  async function listSiteMetrics(days) {
+    const client = await getClient();
+    const since = new Date(Date.now() - Math.min(Math.max(Number(days) || 30, 1), 365) * 86400000).toISOString().slice(0,10);
+    const result = await client.from('site_metrics').select('metric_day,page_path,referrer_host,views').gte('metric_day',since).order('metric_day',{ ascending:false }).limit(2000);
+    if (result.error) {
+      if (['PGRST205','42P01'].includes(result.error.code) || String(result.error.message||'').includes('site_metrics')) return null;
+      throw result.error;
+    }
+    return result.data || [];
   }
 
   async function listCategories() {
@@ -193,8 +256,7 @@
     const rows = optionalRows(await client.from('authors').select('*').order('sort_order').order('name').limit(200));
     if (rows === null) return null;
     return rows.map(function (row) {
-      const profiles = { furkan:'yazar-furkan.html', eray:'yazar-eray.html', berkay:'yazar-berkay.html' };
-      return { id: row.slug, name: row.name, role: row.role, bio: row.bio, image: row.image_url, active: row.is_active, sortOrder: row.sort_order, profile: profiles[row.slug] || 'yazarlar.html' };
+      return { id: row.slug, name: row.name, role: row.role, bio: row.bio, image: row.image_url, active: row.is_active, sortOrder: row.sort_order, profile: 'yazar.html?id=' + encodeURIComponent(row.slug) };
     });
   }
 
@@ -412,16 +474,18 @@
       permissions:{ editor:true, admin:isAdmin, profileScope:isAdmin ? 'all' : 'self', articleScope:isAdmin ? 'all' : 'own' },
       registration:{ signupDisabled:authSettings.disable_signup === true, anonymousDisabled:!(authSettings.external && authSettings.external.anonymous_users === true) },
       library:'2.112.3-local',
-      mediaBucket:Boolean(config.mediaBucket)
+      mediaBucket:Boolean(config.mediaBucket),
+      mfa:await getMfaStatus()
     };
   }
 
   async function saveArticle(article) {
     const client = await getClient();
     const row = articleToRow(article);
+    const returnFields = config.analyticsEnabled === true ? MANAGED_ARTICLE_FIELDS : LEGACY_ARTICLE_FIELDS + ',created_by';
     const result = row.id
-      ? await client.from('articles').update(row).eq('id', row.id).select(MANAGED_ARTICLE_FIELDS).single()
-      : await client.from('articles').insert(row).select(MANAGED_ARTICLE_FIELDS).single();
+      ? await client.from('articles').update(row).eq('id', row.id).select(returnFields).single()
+      : await client.from('articles').insert(row).select(returnFields).single();
     if (result.error) throw result.error;
     return rowToArticle(result.data);
   }
@@ -464,12 +528,12 @@
   window.FUTMAC_SUPABASE = Object.freeze({
     enabled: enabled(), leagueManagementEnabled: config.leagueManagementEnabled === true,
     getClient: getClient, getSession: getSession, onAuthStateChange: onAuthStateChange, signIn: signIn,
-    signOut: signOut, requestPasswordReset: requestPasswordReset, updatePassword: updatePassword,
+    signOut: signOut, requestPasswordReset: requestPasswordReset, updatePassword: updatePassword, getMfaStatus:getMfaStatus, enrollTotp:enrollTotp, verifyTotp:verifyTotp,
     listArticles: listArticles, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
     listAuthors: listAuthors, listTeams: listTeams, listStandings: listStandings, listFixtures: listFixtures,
     getSiteSettings: getSiteSettings, saveSiteSettings: saveSiteSettings,
-    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, ensureStandingsForTeams: ensureStandingsForTeams, saveAuthor: saveAuthor, deleteAuthor: deleteAuthor, setAuthorOriginalId: setAuthorOriginalId,
-    saveTeam: saveTeam, deleteTeam: deleteTeam, saveCategory: saveCategory, deleteCategory: deleteCategory,
+    saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, ensureStandingsForTeams: ensureStandingsForTeams, saveAuthor: saveAuthor, deleteAuthor: deleteAuthor, setAuthorOriginalId: setAuthorOriginalId, trackArticleView:trackArticleView,
+    saveTeam: saveTeam, deleteTeam: deleteTeam, saveCategory: saveCategory, deleteCategory: deleteCategory, trackPageView:trackPageView, listSiteMetrics:listSiteMetrics,
     listProfiles: listProfiles, saveProfile: saveProfile, listAuditLogs: listAuditLogs, healthCheck: healthCheck,
     uploadImage: uploadImage
   });

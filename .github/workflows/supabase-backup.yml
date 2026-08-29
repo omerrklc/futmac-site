@@ -1,0 +1,52 @@
+name: FUTMAC Supabase Backup
+
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      FUTMAC_SUPABASE_URL: ${{ secrets.FUTMAC_SUPABASE_URL }}
+      FUTMAC_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.FUTMAC_SUPABASE_SERVICE_ROLE_KEY }}
+      FUTMAC_BACKUP_DIR: backup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Yedekleme ayarlarını doğrula
+        id: config
+        run: |
+          if test -n "$SUPABASE_DB_URL" && test -n "$FUTMAC_SUPABASE_URL" && test -n "$FUTMAC_SUPABASE_SERVICE_ROLE_KEY"; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Yedekleme beklemede: GitHub Actions secret'ları henüz eklenmedi." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: PostgreSQL araçlarını kur
+        if: steps.config.outputs.ready == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+      - name: Veritabanını yedekle
+        if: steps.config.outputs.ready == 'true'
+        run: mkdir -p backup && pg_dump "$SUPABASE_DB_URL" --format=custom --no-owner --no-privileges --file=backup/futmac-database.dump
+      - name: Medya dosyalarını yedekle
+        if: steps.config.outputs.ready == 'true'
+        run: node scripts/backup-storage.mjs
+      - name: Yedek özetini oluştur
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > backup/created-at.txt
+          find backup -type f -printf '%P\n' | sort > backup/manifest.txt
+      - name: Şifreli GitHub çalışma çıktısını sakla
+        if: steps.config.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: futmac-backup-${{ github.run_id }}
+          path: backup
+          retention-days: 14
+          if-no-files-found: error

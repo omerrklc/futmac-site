@@ -11,6 +11,8 @@ if (!projectUrl || !publicKey) throw new Error('Supabase genel bağlantı bilgil
 const response = await fetch(projectUrl + '/rest/v1/articles?select=id,title,excerpt,image_url,image_alt,published_at,updated_at,status&status=eq.published&order=published_at.desc', { headers:{ apikey:publicKey } });
 if (!response.ok) throw new Error('Yayımlanmış haberler alınamadı: ' + response.status);
 const articles = await response.json();
+const authorsResponse = await fetch(projectUrl + '/rest/v1/authors?select=slug,updated_at,is_active&is_active=eq.true&order=sort_order.asc', { headers:{ apikey:publicKey } });
+const authors = authorsResponse.ok ? await authorsResponse.json() : [];
 const output = path.join(root, 'haber');
 const shareOutput = path.join(root, 'paylas');
 const mediaOutput = path.join(root, 'haber-media');
@@ -78,7 +80,7 @@ for (const article of articles) {
 <meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${image}">
 <meta property="article:published_time" content="${published}">
 <link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/fixes.css"><link rel="stylesheet" href="assets/css/complete.css">
-<script src="assets/js/supabase-config.js" defer><\/script><script src="assets/js/supabase-service.js?v=20260829-6" defer><\/script><script src="assets/js/data.js?v=20260829-6" defer><\/script><script src="assets/js/app.js?v=20260829-7" defer><\/script>
+<script src="assets/js/supabase-config.js?v=20260830-1" defer><\/script><script src="assets/js/supabase-service.js?v=20260830-1" defer><\/script><script src="assets/js/data.js?v=20260830-1" defer><\/script><script src="assets/js/app.js?v=20260830-1" defer><\/script>
 </head><body data-section="emac" data-schema="article">
 <a class="skip-link" href="#icerik">İçeriğe geç</a>
 <div class="top-strip"><div class="wrap top-inner"><span>FUTMAC.COM</span><span>E-MAC TURKA FANTAZİ LİGİ</span></div></div>
@@ -100,4 +102,14 @@ for (const entry of await readdir(shareOutput, { withFileTypes:true })) {
 for (const entry of await readdir(mediaOutput, { withFileTypes:true })) {
   if (entry.isFile() && !expectedMedia.has(entry.name)) await rm(path.join(mediaOutput, entry.name));
 }
+const staticPages = ['', 'futbol.html', 'emac-ligi.html', 'fantazi.html', 'transfer.html', 'yazarlar.html', 'macaton.html', 'haftanin-11i.html', 'oduller.html', 'fikstur.html', 'puan-durumu.html', 'arsiv.html', 'kurallar.html', 'hakkimizda.html', 'iletisim.html', 'gizlilik.html', 'kullanim-kosullari.html'];
+const isoDate = value => { const date = new Date(value || Date.now()); return Number.isNaN(date.getTime()) ? new Date().toISOString().slice(0,10) : date.toISOString().slice(0,10); };
+const sitemapUrls = staticPages.map((page, index) => ({ url:'https://futmac.com.tr/' + page, lastmod:isoDate(), priority:index === 0 ? '1.0' : '0.7' }));
+for (const author of authors) sitemapUrls.push({ url:'https://futmac.com.tr/yazar.html?id=' + encodeURIComponent(author.slug), lastmod:isoDate(author.updated_at), priority:'0.6' });
+for (const article of articles) {
+  const version = Math.max(0, new Date(article.updated_at || article.published_at || 0).getTime()).toString(36);
+  sitemapUrls.push({ url:'https://futmac.com.tr/paylas/' + article.id + '-' + version + '.html', lastmod:isoDate(article.updated_at || article.published_at), priority:'0.8' });
+}
+const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + sitemapUrls.map(item => '  <url><loc>' + escape(item.url) + '</loc><lastmod>' + item.lastmod + '</lastmod><priority>' + item.priority + '</priority></url>').join('\n') + '\n</urlset>\n';
+await writeFile(path.join(root, 'sitemap.xml'), sitemap, 'utf8');
 console.log(articles.length + ' sosyal paylaşım sayfası hazırlandı.');

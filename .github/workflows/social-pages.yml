@@ -34,12 +34,12 @@ jobs:
         run: node scripts/generate-social-pages.mjs
       - name: Değişiklikleri yayın kaynağına kaydet
         run: |
-          if git diff --quiet -- haber paylas haber-media; then
+          if git diff --quiet -- haber paylas haber-media sitemap.xml; then
             echo "Paylaşım sayfaları güncel."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add haber paylas haber-media
+          git add haber paylas haber-media sitemap.xml
           git commit -m "Update social preview pages"
           git push
