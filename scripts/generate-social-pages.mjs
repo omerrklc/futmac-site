@@ -1,5 +1,6 @@
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(import.meta.dirname, '..');
 const configSource = await readFile(path.join(root, 'assets/js/supabase-config.js'), 'utf8');
@@ -32,11 +33,22 @@ for (const article of articles) {
     const transformed = socialImage.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=1200&height=630&resize=cover&quality=50';
     const imageResponse = await fetch(transformed, { headers:{ Accept:'image/webp,image/*' } });
     if (imageResponse.ok && String(imageResponse.headers.get('content-type')).includes('image/webp')) {
-      const mediaName = article.id + '.webp';
-      await writeFile(path.join(mediaOutput, mediaName), Buffer.from(await imageResponse.arrayBuffer()));
-      expectedMedia.add(mediaName);
-      socialImage = 'https://futmac.com.tr/haber-media/' + mediaName;
-      socialImageType = 'image/webp';
+      const webpName = article.id + '.webp';
+      const jpgName = article.id + '.jpg';
+      const webpPath = path.join(mediaOutput, webpName);
+      const jpgPath = path.join(mediaOutput, jpgName);
+      await writeFile(webpPath, Buffer.from(await imageResponse.arrayBuffer()));
+      const conversion = spawnSync('convert', [webpPath, '-strip', '-quality', '78', jpgPath], { stdio:'inherit' });
+      if (conversion.status === 0) {
+        await rm(webpPath);
+        expectedMedia.add(jpgName);
+        socialImage = 'https://futmac.com.tr/haber-media/' + jpgName;
+        socialImageType = 'image/jpeg';
+      } else {
+        expectedMedia.add(webpName);
+        socialImage = 'https://futmac.com.tr/haber-media/' + webpName;
+        socialImageType = 'image/webp';
+      }
     }
   }
   const image = escape(socialImage);
