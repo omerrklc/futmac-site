@@ -37,8 +37,8 @@ for (const article of articles) {
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${title}">
 <meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${image}">
 <meta property="article:published_time" content="${published}">
-<meta http-equiv="refresh" content="0;url=${escape(articleUrl)}">
-</head><body><p>Haber açılıyor… <a href="${escape(articleUrl)}">Devam etmek için tıklayın.</a></p></body></html>\n`;
+</head><body><p>Haber açılıyor… <a href="${escape(articleUrl)}">Devam etmek için tıklayın.</a></p>
+<script>window.location.replace(${JSON.stringify(articleUrl).replace(/</g, '\\u003c')});<\/script></body></html>\n`;
   await writeFile(path.join(output, fileName), html, 'utf8');
 }
 
