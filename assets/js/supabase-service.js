@@ -427,22 +427,30 @@
   }
 
   async function uploadImage(file, folder) {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!file || !allowed.includes(file.type)) throw new Error('Yalnızca JPG, PNG veya WebP görsel yüklenebilir.');
+    if (!file) throw new Error('Yalnızca JPG, PNG veya WebP görsel yüklenebilir.');
     if (file.size > 5 * 1024 * 1024) throw new Error('Görsel 5 MB sınırını aşıyor.');
     const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
     const jpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
     const png = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 && bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
     const webp = String.fromCharCode.apply(null, bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode.apply(null, bytes.slice(8, 12)) === 'WEBP';
-    if ((file.type === 'image/jpeg' && !jpeg) || (file.type === 'image/png' && !png) || (file.type === 'image/webp' && !webp)) throw new Error('Dosya uzantısı ile gerçek görsel biçimi uyuşmuyor.');
+    const detectedType = jpeg ? 'image/jpeg' : png ? 'image/png' : webp ? 'image/webp' : '';
+    if (!detectedType) throw new Error('Dosyanın gerçek biçimi JPG, PNG veya WebP değil.');
     const client = await getClient();
     const userResult = await client.auth.getUser();
     if (userResult.error || !userResult.data.user) throw new Error('Görsel yüklemek için yeniden giriş yapın.');
-    const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+    const extension = detectedType === 'image/png' ? 'png' : detectedType === 'image/webp' ? 'webp' : 'jpg';
     const safeFolder = folder === 'authors' ? 'authors' : folder === 'teams' ? 'teams' : 'articles';
-    const path = safeFolder + '/' + userResult.data.user.id + '/' + crypto.randomUUID() + '.' + extension;
-    const upload = await client.storage.from(config.mediaBucket || 'futmac-media').upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type });
-    if (upload.error) throw upload.error;
+    const normalizedFile = file.type === detectedType ? file : new File([file], String(file.name || 'gorsel').replace(/\.[^.]+$/, '') + '.' + extension, { type:detectedType, lastModified:file.lastModified || Date.now() });
+    let upload=null,path='';
+    for (let attempt=0;attempt<2;attempt+=1) {
+      path = safeFolder + '/' + userResult.data.user.id + '/' + crypto.randomUUID() + '.' + extension;
+      try { upload = await client.storage.from(config.mediaBucket || 'futmac-media').upload(path, normalizedFile, { cacheControl:'3600', upsert:false, contentType:detectedType }); }
+      catch (error) { upload={ error:error }; }
+      if (!upload.error) break;
+      const message=String(upload.error.message||'').toLowerCase();
+      if (attempt===1||message.includes('row-level security')||message.includes('permission')||message.includes('bucket')) throw upload.error;
+    }
+    if (!upload||upload.error) throw upload&&upload.error||new Error('Görsel yüklenemedi.');
     const publicUrl = client.storage.from(config.mediaBucket || 'futmac-media').getPublicUrl(path);
     return publicUrl.data.publicUrl;
   }
