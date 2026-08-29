@@ -320,17 +320,29 @@
       const lead = items[0];
       homeNews.innerHTML = '<article class="portal-main-story"><a href="' + escapeHtml(lead.url) + '"><img src="' + escapeHtml(lead.image) + '" alt="' + escapeHtml(lead.imageAlt || lead.title) + '"></a><div><span>' + escapeHtml(categoryName(lead.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(lead.url) + '">' + escapeHtml(lead.title) + '</a></h2><p>' + escapeHtml(lead.excerpt) + '</p><a class="portal-more" href="' + escapeHtml(lead.url) + '">Haberi oku »</a></div></article>' + items.slice(1).map(function (article) { return '<article class="portal-news"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"><div><span>' + escapeHtml(categoryName(article.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>'; }).join('');
     }
+    const settings = data.siteSettings || {};
+    const parseManualRows = function (text) {
+      return String(text || '').split(/\r?\n/).map(function (line) {
+        const parts = line.split('|').map(function (part) { return part.trim(); });
+        if (parts.length < 2 || !parts[0] || !parts[1]) return null;
+        const url = parts.slice(2).join('|').trim() || 'index.html';
+        if (!/^(?:[a-z0-9][a-z0-9-]*\.html(?:[?#][^\s]*)?|https:\/\/[^\s]+)$/i.test(url)) return null;
+        return { label:parts[0], title:parts[1], url:url };
+      }).filter(Boolean).slice(0, 20);
+    };
     const latest = items.slice(0, 5);
+    const manualBreaking = settings.breakingManual ? parseManualRows(settings.breakingItemsText) : null;
     const ticker = document.querySelector('[data-breaking-ticker]');
-    if (ticker) ticker.innerHTML = latest.length ? latest.map(function (article, index) { return (index ? '<i>•</i>' : '') + '<a href="' + escapeHtml(article.url) + '"><span>' + escapeHtml(article.title) + '</span></a>'; }).join('') : '<span>Henüz yayımlanmış haber yok.</span>';
+    if (ticker) ticker.innerHTML = manualBreaking ? (manualBreaking.length ? manualBreaking.map(function (item, index) { return (index ? '<i>•</i>' : '') + '<a href="' + escapeHtml(item.url) + '"><span>' + escapeHtml(item.title) + '</span></a>'; }).join('') : '<span>Henüz manuel son dakika eklenmedi.</span>') : (latest.length ? latest.map(function (article, index) { return (index ? '<i>•</i>' : '') + '<a href="' + escapeHtml(article.url) + '"><span>' + escapeHtml(article.title) + '</span></a>'; }).join('') : '<span>Henüz yayımlanmış haber yok.</span>');
     const latestList = document.querySelector('[data-latest-news]');
-    if (latestList) latestList.innerHTML = latest.length ? latest.map(function (article) { return '<li><time>' + escapeHtml(article.time || '--:--') + '</time><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></li>'; }).join('') : '<li>Henüz haber yok.</li>';
+    if (latestList) latestList.innerHTML = manualBreaking ? (manualBreaking.length ? manualBreaking.map(function (item) { return '<li><time>' + escapeHtml(item.label) + '</time><a href="' + escapeHtml(item.url) + '">' + escapeHtml(item.title) + '</a></li>'; }).join('') : '<li>Henüz manuel son dakika eklenmedi.</li>') : (latest.length ? latest.map(function (article) { return '<li><time>' + escapeHtml(article.time || '--:--') + '</time><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></li>'; }).join('') : '<li>Henüz haber yok.</li>');
     const recentList = document.querySelector('[data-recent-news]');
     if (recentList) recentList.innerHTML = latest.length ? latest.map(function (article) { return '<li><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></li>'; }).join('') : '<li>Henüz haber yok.</li>';
     const fixtureList = document.querySelector('[data-upcoming-matches]');
     if (fixtureList) {
+      const manualMatches = settings.upcomingManual ? parseManualRows(settings.upcomingItemsText) : null;
       const matches = Object.keys(data.fixtures || {}).reduce(function (all, week) { return all.concat((data.fixtures[week] || []).map(function (match) { return Object.assign({ week:week }, match); })); }, []).filter(function (match) { return match.status !== 'finished'; }).sort(function (a, b) { return String(a.kickoffAt || a.date).localeCompare(String(b.kickoffAt || b.date)); }).slice(0, 5);
-      fixtureList.innerHTML = matches.length ? matches.map(function (match) { const label = match.status === 'live' ? 'CANLI' : String(match.date || '').replace(/\s+\d{4}$/, ''); return '<li><time>' + escapeHtml(label) + '</time><a href="fikstur.html?hafta=' + encodeURIComponent(match.week) + '">' + escapeHtml(match.home + ' - ' + match.away) + '</a></li>'; }).join('') : '<li>Henüz yaklaşan maç eklenmedi.</li>';
+      fixtureList.innerHTML = manualMatches ? (manualMatches.length ? manualMatches.map(function (item) { return '<li><time>' + escapeHtml(item.label) + '</time><a href="' + escapeHtml(item.url) + '">' + escapeHtml(item.title) + '</a></li>'; }).join('') : '<li>Henüz manuel yaklaşan maç eklenmedi.</li>') : (matches.length ? matches.map(function (match) { const label = match.status === 'live' ? 'CANLI' : String(match.date || '').replace(/\s+\d{4}$/, ''); return '<li><time>' + escapeHtml(label) + '</time><a href="fikstur.html?hafta=' + encodeURIComponent(match.week) + '">' + escapeHtml(match.home + ' - ' + match.away) + '</a></li>'; }).join('') : '<li>Henüz yaklaşan maç eklenmedi.</li>');
     }
   }
 
