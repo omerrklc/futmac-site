@@ -295,7 +295,12 @@
     const row = { slug:author.id, name:author.name, role:author.role, bio:author.bio, image_url:author.image, is_active:author.active, sort_order:author.sortOrder };
     const originalId = author.originalId || editedAuthorOriginalId || author.id;
     if (originalId === author.id) {
-      const result = await client.from('authors').upsert(row, { onConflict:'slug' }).select().single(); if (result.error) throw result.error; editedAuthorOriginalId = ''; return result.data;
+      const result = await client.from('authors').upsert(row, { onConflict:'slug' }).select().single();
+      if (result.error) throw result.error;
+      const linked = await client.from('articles').update({ author_name:author.name }).eq('author_slug', author.id);
+      if (linked.error) throw linked.error;
+      editedAuthorOriginalId = '';
+      return result.data;
     }
     const changed = await client.from('authors').update(row).eq('slug', originalId).select().single();
     if (changed.error) throw changed.error;

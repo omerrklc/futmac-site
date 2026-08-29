@@ -132,6 +132,18 @@
     if(matchCenter){matchCenter.href=settings.matchCenterLink||'fikstur.html';const centerTitle=matchCenter.querySelector('strong');if(centerTitle)centerTitle.textContent=settings.matchCenterTitle||'';}
   }
   applySiteSettings();
+  const removedDemoPages = new Set(['haber.html','haber-fikstur.html','haber-transfer.html','haber-derbi.html','haber-oduller.html','haber-macaton.html','haber-haftanin-11i.html','yazi-yeni-donem.html','yazi-butce.html','yazi-eray.html','yazi-berkay.html']);
+  if (removedDemoPages.has(fileName)) {
+    const main = document.querySelector('main');
+    if (main) main.innerHTML = '<div class="state-panel"><strong>Bu örnek içerik kaldırıldı.</strong><span>Güncel haberler için ana sayfaya veya haber arşivine dönebilirsiniz.</span><p><a class="read-more" href="index.html">Ana sayfaya dön</a> · <a class="read-more" href="arsiv.html">Arşivi aç</a></p></div>';
+    document.title = 'İçerik kaldırıldı | FUTMAC';
+  }
+  document.querySelectorAll('a[href]').forEach(function (link) {
+    const href = String(link.getAttribute('href') || '').split(/[?#]/)[0];
+    if (!removedDemoPages.has(href)) return;
+    const container = link.closest('li');
+    if (container) container.remove();
+  });
   function categoryName(key) { return data && data.categories[key] ? data.categories[key].title : key; }
   function articleRow(article) {
  return '<article class="news-row"><a href="' + escapeHtml(article.url) + '"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"></a><div><div class="news-row__meta"><b>' + escapeHtml(categoryName(article.category).toUpperCase()) + '</b><time datetime="' + escapeHtml(article.date) + '">' + escapeHtml(article.displayDate) + ' · ' + escapeHtml(article.time) + '</time><span>' + escapeHtml(article.readTime) + '</span></div><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>';
@@ -157,6 +169,11 @@
     const pagination = document.querySelector('[data-category-pagination]');
     const pageSize = 4;
     let currentPage = 1;
+    const feature = document.querySelector('.listing-feature');
+    if (feature) {
+      if (!all.length) feature.remove();
+      else feature.innerHTML = '<img src="' + escapeHtml(all[0].image) + '" alt="' + escapeHtml(all[0].imageAlt || all[0].title) + '"><div><small>ÖNE ÇIKAN</small><h2><a href="' + escapeHtml(all[0].url) + '">' + escapeHtml(all[0].title) + '</a></h2><p>' + escapeHtml(all[0].excerpt) + '</p></div>';
+    }
     function draw() {
       const items = all.slice((currentPage - 1) * pageSize, currentPage * pageSize);
       results.innerHTML = items.length ? items.map(articleRow).join('') : '<div class="state-panel"><strong>Bu bölümde henüz içerik yok.</strong><span>Yeni içerikler yayımlandığında burada görünecek.</span></div>';
@@ -186,7 +203,11 @@
     const status = document.querySelector('[data-archive-status]');
     const pagination = document.querySelector('[data-archive-pagination]');
     const params = new URLSearchParams(window.location.search);
-    search.value = params.get('q') || ''; category.value = params.get('kategori') || 'all'; author.value = params.get('yazar') || 'all'; month.value = params.get('ay') || 'all';
+    const authorOptions = new Map();
+    (data.authors || []).filter(function (item) { return item.active !== false; }).forEach(function (item) { authorOptions.set(item.id, item.name); });
+    data.articles.forEach(function (item) { if (item.author && !item.authorId) authorOptions.set(item.author, item.author); });
+    author.innerHTML = '<option value="all">Tüm yazarlar</option>' + Array.from(authorOptions).map(function (item) { return '<option value="' + escapeHtml(item[0]) + '">' + escapeHtml(item[1]) + '</option>'; }).join('');
+    search.value = params.get('q') || ''; category.value = params.get('kategori') || 'all'; author.value = Array.from(author.options).some(function(option){return option.value===(params.get('yazar')||'all');})?(params.get('yazar')||'all'):'all'; month.value = params.get('ay') || 'all';
     let currentPage = Number(params.get('sayfa')) || 1;
     const pageSize = 5;
     function selectedItems() {
