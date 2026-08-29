@@ -80,7 +80,7 @@ for (const article of articles) {
 <meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${image}">
 <meta property="article:published_time" content="${published}">
 <link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/fixes.css"><link rel="stylesheet" href="assets/css/complete.css">
-<script src="assets/js/supabase-config.js?v=20260830-1" defer><\/script><script src="assets/js/supabase-service.js?v=20260830-1" defer><\/script><script src="assets/js/data.js?v=20260830-1" defer><\/script><script src="assets/js/app.js?v=20260830-1" defer><\/script>
+<script src="assets/js/supabase-config.js?v=20260830-3" defer><\/script><script src="assets/js/supabase-service.js?v=20260830-3" defer><\/script><script src="assets/js/data.js?v=20260830-3" defer><\/script><script src="assets/js/app.js?v=20260830-3" defer><\/script>
 </head><body data-section="emac" data-schema="article">
 <a class="skip-link" href="#icerik">İçeriğe geç</a>
 <div class="top-strip"><div class="wrap top-inner"><span>FUTMAC.COM</span><span>E-MAC TURKA FANTAZİ LİGİ</span></div></div>
