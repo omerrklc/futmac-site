@@ -1,8 +1,58 @@
 -- FUTMAC SEO, yazar kimliği ve gizlilik dostu okunma sayacı
 -- Önceki migration dosyalarından sonra Supabase SQL Editor içinde bir kez çalıştırın.
 
+-- SQL Editor ve anonim sayaç çağrılarında auth.uid() boş olur. Eski tetikleyici
+-- updated_by alanını doğrudan NULL yaptığı için mevcut sahibin kimliğini koru.
+create or replace function public.set_updated_at()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  new.updated_at = now();
+  if tg_table_name = 'articles' then
+    new.updated_by = coalesce(auth.uid(), new.updated_by, old.updated_by);
+  end if;
+  return new;
+end;
+$$;
+
 alter table public.articles add column if not exists view_count bigint not null default 0 check (view_count >= 0);
 create index if not exists articles_popular_idx on public.articles (status, view_count desc, published_at desc);
+
+-- Anonim okunma artışları editoryal değişiklik değildir; işlem geçmişini
+-- binlerce sahipsiz sayaç kaydıyla doldurmadan gerçek içerik değişikliklerini kaydet.
+create or replace function public.write_audit_log()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  old_row jsonb := case when tg_op = 'INSERT' then null else to_jsonb(old) end;
+  new_row jsonb := case when tg_op = 'DELETE' then null else to_jsonb(new) end;
+  source_row jsonb := coalesce(new_row, old_row);
+begin
+  if tg_table_name = 'articles' and tg_op = 'UPDATE' and auth.uid() is null
+     and (new_row - array['view_count','updated_at','updated_by']::text[])
+       = (old_row - array['view_count','updated_at','updated_by']::text[]) then
+    return new;
+  end if;
+  insert into public.audit_log (actor_id, actor_name, actor_role, action, table_name, record_id, details)
+  values (
+    auth.uid(),
+    (select display_name from public.profiles where id = auth.uid()),
+    (select role from public.profiles where id = auth.uid()),
+    tg_op,
+    tg_table_name,
+    coalesce(source_row ->> 'id', source_row ->> 'slug', source_row ->> 'team_id'),
+    jsonb_strip_nulls(jsonb_build_object(
+      'old', case when old_row is null then null else old_row - array['body']::text[] end,
+      'new', case when new_row is null then null else new_row - array['body']::text[] end
+    ))
+  );
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
+end;
+$$;
+revoke all on function public.write_audit_log() from public;
 
 -- Eski kayıtlarda yalnızca ad yazılmışsa güncel yazarın kısa kimliğini kalıcı bağlar.
 update public.articles article
