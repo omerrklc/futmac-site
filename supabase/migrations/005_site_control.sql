@@ -16,6 +16,8 @@ insert into public.site_settings (id, settings) values (true, jsonb_build_object
   'ruleLink','kurallar.html#butce', 'ruleLinkLabel','MADDE 3-4 »',
   'promoTitle','2026-2027 RESMÎ MEVZUAT', 'promoText','19 MADDE »', 'promoLink','kurallar.html',
   'matchCenterTitle','CANLI SONUÇLAR', 'matchCenterLink','fikstur.html',
+  'breakingManual',false, 'breakingItemsText','',
+  'upcomingManual',false, 'upcomingItemsText','',
   'standingsOrderMode','automatic',
   'footerText','© 2026 E-Mac Turka''nın Spor Gazetesi',
   'breakingVisible',true, 'ruleBannerVisible',true, 'writersVisible',true,
