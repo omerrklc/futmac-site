@@ -225,17 +225,20 @@
     const client = await getClient();
     const results = await Promise.all([
       client.from('standings').select('team_id,played,won,drawn,lost,fantasy_points,league_points,movement,form,updated_at').limit(200),
-      client.from('league_teams').select('id,name,manager,sort_order,is_active').eq('is_active', true).order('sort_order').order('name').limit(200)
+      client.from('league_teams').select('id,name,manager,sort_order,is_active').eq('is_active', true).order('sort_order').order('name').limit(200),
+      client.from('site_settings').select('settings').eq('id', true).maybeSingle()
     ]);
     const rows = optionalRows(results[0]), teamRows = optionalRows(results[1]);
     if (rows === null || teamRows === null) return null;
+    const settingsRow = optionalRows(results[2]);
+    const sortMode = settingsRow && settingsRow.settings && settingsRow.settings.standingsOrderMode === 'manual' ? 'manual' : 'automatic';
     const byTeam = new Map(rows.map(function (row) { return [row.team_id, row]; }));
     const merged = teamRows.map(function (team) {
       const saved = byTeam.get(team.id) || {};
       return { team_id:team.id, played:saved.played || 0, won:saved.won || 0, drawn:saved.drawn || 0, lost:saved.lost || 0, fantasy_points:saved.fantasy_points || 0, league_points:saved.league_points || 0, movement:saved.movement || 'same', form:saved.form || [], updated_at:saved.updated_at || null, team:team };
     });
-    merged.sort(function (a, b) { return b.league_points - a.league_points || b.fantasy_points - a.fantasy_points || (a.team.sort_order || 0) - (b.team.sort_order || 0); });
-    return merged.map(function (row, index) { return { rank: index + 1, teamId: row.team_id, team: row.team.name, manager: row.team.manager, played: row.played, won: row.won, drawn: row.drawn, lost: row.lost, fantasy: row.fantasy_points, points: row.league_points, change: row.movement, form: row.form || [], updatedAt: row.updated_at }; });
+    merged.sort(function (a, b) { if (sortMode === 'manual') return (a.team.sort_order || 0) - (b.team.sort_order || 0) || b.league_points - a.league_points || b.fantasy_points - a.fantasy_points; return b.league_points - a.league_points || b.fantasy_points - a.fantasy_points || (a.team.sort_order || 0) - (b.team.sort_order || 0); });
+    return merged.map(function (row, index) { return { rank: index + 1, teamId: row.team_id, team: row.team.name, manager: row.team.manager, played: row.played, won: row.won, drawn: row.drawn, lost: row.lost, fantasy: row.fantasy_points, points: row.league_points, change: row.movement, form: row.form || [], updatedAt: row.updated_at, sortMode:sortMode, manualOrder:row.team.sort_order || 0 }; });
   }
 
   async function listFixtures() {

@@ -217,6 +217,7 @@
 
   function formMarkup(form) { return form.map(function (result) { return '<i class="form ' + (result === 'G' ? 'win' : result === 'M' ? 'loss' : 'draw') + '">' + result + '</i>'; }).join(''); }
   function renderStandings() {
+    const standingsMode=data&&data.standings[0]&&data.standings[0].sortMode||'automatic';const standingsNote=document.querySelector('.standings-note');if(standingsNote)standingsNote.innerHTML=standingsMode==='manual'?'<strong>Sıralama yöntemi:</strong> Yönetici tarafından belirlenen manuel lig sırası kullanılıyor.':'<strong>Sıralama ölçütü:</strong> Önce lig puanı esas alınır. Lig puanlarının eşit olması hâlinde toplam fantazi puanı averaj olarak değerlendirilir.';
     const standingsIntro=document.querySelector('.listing-intro p');if(standingsIntro&&body.dataset.section==='puan')standingsIntro.textContent='E-Mac fantazi liginin güncel '+(data?data.standings.length:0)+' takım, yönetici ve puan verisi.';
     const standingsSummary=document.querySelector('.archive-summary');if(standingsSummary&&body.dataset.section==='puan'&&!standingsSummary.querySelector('[data-standing-count]'))standingsSummary.insertAdjacentHTML('beforeend','<span><strong data-standing-count>'+(data?data.standings.length:0)+'</strong> takım listeleniyor</span>');
     const prototypeNote=document.querySelector('.prototype-note');if(prototypeNote&&body.dataset.section==='puan')prototypeNote.remove();
