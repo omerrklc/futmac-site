@@ -55,16 +55,20 @@
         return null;
       });
     }
+    const articlePath = location.pathname.match(/\/(?:haber|paylas)\/([0-9a-f-]{36})(?:-[a-z0-9]+)?\.html$/i);
+    const requestedArticleId = new URLSearchParams(location.search).get('id') || (articlePath && articlePath[1]);
     window.FUTMAC_REMOTE_READY = Promise.all([
       optionalLoad('haber', function () { return backend.listArticles({ publishedOnly: true }); }),
       optionalLoad('kategori', function () { return backend.listCategories(); }),
       backend.leagueManagementEnabled ? optionalLoad('yazar', function () { return backend.listAuthors(); }) : Promise.resolve(null),
       backend.leagueManagementEnabled ? optionalLoad('puan durumu', function () { return backend.listStandings(); }) : Promise.resolve(null),
       backend.leagueManagementEnabled ? optionalLoad('fikstür', function () { return backend.listFixtures(); }) : Promise.resolve(null),
-      backend.getSiteSettings ? optionalLoad('site ayarı', function () { return backend.getSiteSettings(); }) : Promise.resolve(null)
+      backend.getSiteSettings ? optionalLoad('site ayarı', function () { return backend.getSiteSettings(); }) : Promise.resolve(null),
+      requestedArticleId && backend.getPublishedArticle ? backend.getPublishedArticle(requestedArticleId).catch(function () { window.FUTMAC_ARTICLE_LOAD_FAILED = true; return null; }) : Promise.resolve(null)
     ]).then(function (results) {
       const remoteArticles = results[0], remoteCategories = results[1], remoteAuthors = results[2], remoteStandings = results[3], remoteFixtures = results[4], remoteSettings = results[5];
       if (Array.isArray(remoteArticles)) window.FUTMAC_DATA.articles = remoteArticles;
+      if (results[6] && !window.FUTMAC_DATA.articles.some(function (item) { return item.id === results[6].id; })) window.FUTMAC_DATA.articles.push(results[6]);
       if (remoteCategories && remoteCategories.length) remoteCategories.forEach(function (category) {
         const current = window.FUTMAC_DATA.categories[category.id] || {};
         window.FUTMAC_DATA.categories[category.id] = Object.assign({}, current, { title:category.name, kicker:current.kicker || category.name.toUpperCase(), description:category.description || current.description || '', active:category.active, showInMenu:category.showInMenu, sortOrder:category.sortOrder || 0 });

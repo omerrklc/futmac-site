@@ -66,7 +66,7 @@ try {
   await textCheck('Yönetim rehberi', new URL('yonetim-rehberi.html', SITE), 'FUTMAC YÖNETİM REHBERİ');
   const sitemap = await textCheck('Site haritası', new URL('sitemap.xml', SITE), '<urlset');
   record('Demo içerikler site haritasından kaldırıldı', !sitemap.includes('haber-derbi.html') && !sitemap.includes('yazi-eray.html') && !sitemap.includes('futmac-yayinda'), 'Eski örnek adres bulunmuyor');
-  record('Gerçek haberler site haritasında', sitemap.includes('/paylas/'), 'Paylaşım sayfaları listeleniyor');
+  record('Gerçek haberler site haritasında', sitemap.includes('/haber/'), 'Paylaşım sayfaları listeleniyor');
   record('Dinamik yazar profilleri site haritasında', sitemap.includes('/yazar.html?id='), 'Yazar profilleri listeleniyor');
   await textCheck('Kök robots.txt', new URL('../robots.txt', SITE), 'Sitemap:');
   await textCheck('Hakkımızda sayfası', new URL('hakkimizda.html', SITE), '<h1>Hakkımızda</h1>');

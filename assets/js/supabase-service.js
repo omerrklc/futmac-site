@@ -46,7 +46,6 @@
   function rowToArticle(row) {
     const published = row.published_at ? new Date(row.published_at) : new Date(row.updated_at || row.created_at);
     const scheduled = row.status === 'published' && published.getTime() > Date.now();
-    const shareVersion = Math.max(0, new Date(row.updated_at || row.published_at || row.created_at || 0).getTime()).toString(36);
     return {
       id: row.id,
       slug: row.slug,
@@ -66,7 +65,8 @@
       readTime: row.read_time || '3 dk',
       viewCount: Number(row.view_count || 0),
       ownerId: row.created_by || null,
-      url: row.status === 'published' ? 'paylas/' + encodeURIComponent(row.id) + '-' + shareVersion + '.html' : 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
+      url: 'haber-onizleme.html?id=' + encodeURIComponent(row.id),
+      shareUrl: 'haber/' + encodeURIComponent(row.id) + '.html',
       remote: true
     };
   }
@@ -167,6 +167,25 @@
     }
     if (result.error) throw result.error;
     return result.data.map(rowToArticle);
+  }
+
+  async function getPublishedArticle(id) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '')) return null;
+    const client = await getClient();
+    const result = await client.from('articles').select(config.analyticsEnabled === true ? ARTICLE_FIELDS : LEGACY_ARTICLE_FIELDS).eq('id', id).eq('status','published').lte('published_at', new Date().toISOString()).maybeSingle();
+    if (result.error) throw result.error;
+    return result.data ? rowToArticle(result.data) : null;
+  }
+
+  async function getShareLink(id) {
+    const readUrl = new URL('/haber-onizleme.html?id=' + encodeURIComponent(id), location.origin).href;
+    if (!/^[0-9a-f-]{36}$/i.test(id || '')) return { url:readUrl, ready:false };
+    const shareUrl = new URL('/haber/' + encodeURIComponent(id) + '.html', location.origin).href;
+    try {
+      const response = await fetch(shareUrl, { method:'HEAD', cache:'no-store', signal:AbortSignal.timeout(5000) });
+      if (response.ok) return { url:shareUrl, ready:true };
+    } catch (error) { /* Okuma bağlantısı yayın görevinden bağımsızdır. */ }
+    return { url:readUrl, ready:false };
   }
 
   async function getMfaStatus() {
@@ -538,7 +557,7 @@
     enabled: enabled(), leagueManagementEnabled: config.leagueManagementEnabled === true,
     getClient: getClient, getSession: getSession, onAuthStateChange: onAuthStateChange, signIn: signIn,
     signOut: signOut, requestPasswordReset: requestPasswordReset, updatePassword: updatePassword, getMfaStatus:getMfaStatus, enrollTotp:enrollTotp, verifyTotp:verifyTotp,
-    listArticles: listArticles, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
+    listArticles: listArticles, getPublishedArticle:getPublishedArticle, getShareLink:getShareLink, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
     listAuthors: listAuthors, listTeams: listTeams, listStandings: listStandings, listFixtures: listFixtures,
     getSiteSettings: getSiteSettings, saveSiteSettings: saveSiteSettings,
     saveFixture: saveFixture, deleteFixture: deleteFixture, saveStanding: saveStanding, ensureStandingsForTeams: ensureStandingsForTeams, saveAuthor: saveAuthor, deleteAuthor: deleteAuthor, setAuthorOriginalId: setAuthorOriginalId, trackArticleView:trackArticleView,
