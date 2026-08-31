@@ -304,6 +304,11 @@
       const id = params.get('id') || (pathMatch && pathMatch[1]);
       article = data.articles.find(function (item) { return (item.local || item.remote || item.dynamic) && item.id === id; }) || null;
     }
+    if (!article && !previewMode && (document.documentElement.dataset.remoteState === 'timeout' || window.FUTMAC_ARTICLE_LOAD_FAILED)) {
+      const pending = document.documentElement.dataset.remoteState === 'timeout';
+      container.innerHTML = '<h1>' + (pending ? 'Haber yükleniyor…' : 'Bağlantı kurulamadı') + '</h1><p>' + (pending ? 'Bağlantı yavaş; haber hazır olduğunda burada açılacak.' : 'Bu bir silinmiş haber uyarısı değildir. İnternet bağlantınızı kontrol edip yeniden deneyin.') + '</p><a class="pdf-button" href="' + escapeHtml(location.href) + '">YENİDEN DENE</a>';
+      return;
+    }
     if (!article) {
       robots.content = 'noindex,nofollow';
       container.innerHTML = '<nav class="breadcrumb" aria-label="İçerik yolu"><a href="index.html">Ana Sayfa</a><span>›</span><span>İçerik</span></nav><span class="news-kicker">BULUNAMADI</span><h1>İçerik bulunamadı</h1><p class="dek">Bu içerik silinmiş, taslak durumda veya henüz yayımlanmamış olabilir.</p><p><a class="pdf-button" href="index.html">ANA SAYFAYA DÖN</a></p>';
@@ -372,12 +377,23 @@
   renderLocalArticle();
   renderLocalHomepage();
 
-  document.querySelectorAll('[data-copy-link]').forEach(function (copyButton) {
-    copyButton.addEventListener('click', async function () {
-      const status = copyButton.parentElement.querySelector('.copy-status') || document.querySelector('.copy-status');
-      try { if (!navigator.clipboard || !window.isSecureContext) throw new Error('clipboard-unavailable'); await navigator.clipboard.writeText(window.location.href); if (status) status.textContent = 'Bağlantı kopyalandı.'; }
-      catch (error) { if (status) status.textContent = 'Bağlantı: ' + window.location.href; }
-    });
+  document.addEventListener('click', async function (event) {
+    const button = event.target.closest('[data-copy-link]');
+    if (!button) return;
+    const status = button.parentElement.querySelector('.copy-status');
+    const path = location.pathname.match(/\/(?:haber|paylas)\/([0-9a-f-]{36})(?:-[a-z0-9]+)?\.html$/i);
+    const id = new URLSearchParams(location.search).get('id') || (path && path[1]);
+    button.disabled = true;
+    let link = {url:location.href, ready:true};
+    try {
+      if (id && window.FUTMAC_SUPABASE) link = await window.FUTMAC_SUPABASE.getShareLink(id);
+      await navigator.clipboard.writeText(link.url);
+      if (status) status.textContent = link.ready ? 'Paylaşım bağlantısı kopyalandı.' : 'Okuma bağlantısı kopyalandı. WhatsApp görsel önizlemesi yayın hazırlanırken henüz hazır olmayabilir.';
+    } catch (error) { if (status) status.textContent = 'Bağlantı: ' + link.url; }
+    finally { button.disabled = false; }
+  });
+  document.addEventListener('futmac:remote-settled', function () {
+    renderLocalArticle(); renderLocalHomepage(); renderCategoryPage(); renderArchive(); renderStandings(); renderFixtures(); renderAuthors();
   });
   const ruleSelect = document.querySelector('#rule-section-select');
   if (ruleSelect) ruleSelect.addEventListener('change', function () { const target = document.querySelector(ruleSelect.value); if (target) { target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); target.setAttribute('tabindex', '-1'); target.focus({ preventScroll:true }); } });
@@ -390,7 +406,7 @@
   const socialPathMatch = window.location.pathname.match(/\/(?:haber|paylas)\/([0-9a-f-]{36})(?:-[a-z0-9]+)?\.html$/i);
   const dynamicId = fileName === 'haber-onizleme.html' ? new URLSearchParams(window.location.search).get('id') : socialPathMatch && socialPathMatch[1];
   const authorId = fileName === 'yazar.html' ? new URLSearchParams(window.location.search).get('id') : '';
-  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); } canonical.href = socialPathMatch ? window.location.origin + window.location.pathname : canonicalBase + fileName + (dynamicId ? '?id=' + encodeURIComponent(dynamicId) : authorId ? '?id=' + encodeURIComponent(authorId) : '');
+  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); } canonical.href = dynamicId ? canonicalBase + 'haber/' + encodeURIComponent(dynamicId) + '.html' : canonicalBase + fileName + (authorId ? '?id=' + encodeURIComponent(authorId) : '');
   const description = (document.head.querySelector('meta[name="description"]') || {}).content || 'E-Mac Turka Fantazi Ligi haberleri ve lig merkezi.';
   const renderedHero = document.querySelector('.article-hero'); const socialImage = renderedHero ? new URL(renderedHero.getAttribute('src'), document.baseURI).href : canonicalBase + 'assets/images/logo/emac-turka.png';
   ensureMeta('og:title', document.title, false); ensureMeta('og:description', description, false); ensureMeta('og:type', body.dataset.schema === 'article' ? 'article' : 'website', false); ensureMeta('og:url', canonical.href, false); ensureMeta('og:image', socialImage, false); ensureMeta('twitter:card', 'summary_large_image', true); ensureMeta('twitter:title', document.title, true); ensureMeta('twitter:description', description, true); ensureMeta('twitter:image', socialImage, true);

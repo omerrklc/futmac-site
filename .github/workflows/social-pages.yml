@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Kodu al
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Node.js hazırla
         uses: actions/setup-node@v4
         with:
@@ -34,7 +36,8 @@ jobs:
         run: node scripts/generate-social-pages.mjs
       - name: Değişiklikleri yayın kaynağına kaydet
         run: |
-          if git diff --quiet -- haber paylas haber-media sitemap.xml; then
+          git add haber paylas haber-media sitemap.xml
+          if git diff --cached --quiet -- haber paylas haber-media sitemap.xml; then
             echo "Paylaşım sayfaları güncel."
             exit 0
           fi

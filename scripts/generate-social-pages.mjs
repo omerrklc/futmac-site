@@ -21,6 +21,13 @@ await mkdir(shareOutput, { recursive:true });
 await mkdir(mediaOutput, { recursive:true });
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
+// Daha önce paylaşılmış sürüm adreslerini de koru; yalnızca yayından kaldırılan haberleri sil.
+const history = spawnSync('git', ['log','--all','--format=','--name-only','--','paylas'], { cwd:root, encoding:'utf8', maxBuffer:20*1024*1024 });
+if (history.status !== 0) throw new Error('Eski paylaşım adreslerinin geçmişi okunamadı.');
+const legacyShares = new Set([
+  ...(await readdir(shareOutput)),
+  ...history.stdout.split(/\r?\n/).filter(name => name.startsWith('paylas/')).map(name => path.basename(name))
+]);
 const expected = new Set();
 const expectedShares = new Set();
 const expectedMedia = new Set();
@@ -28,10 +35,7 @@ for (const article of articles) {
   if (!/^[0-9a-f-]{36}$/i.test(article.id)) continue;
   const fileName = article.id + '.html';
   expected.add(fileName);
-  const shareVersion = Math.max(0, new Date(article.updated_at || article.published_at || 0).getTime()).toString(36);
-  const shareFileName = article.id + '-' + shareVersion + '.html';
-  expectedShares.add(shareFileName);
-  const shareUrl = 'https://futmac.com.tr/paylas/' + shareFileName;
+  const shareUrl = 'https://futmac.com.tr/haber/' + fileName;
   const title = escape(article.title + ' | FUTMAC');
   const description = escape(article.excerpt || 'FUTMAC haber merkezi içeriği.');
   let socialImage = article.image_url || 'https://futmac.com.tr/assets/images/logo/emac-turka.png';
@@ -80,7 +84,7 @@ for (const article of articles) {
 <meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${image}">
 <meta property="article:published_time" content="${published}">
 <link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/fixes.css"><link rel="stylesheet" href="assets/css/complete.css">
-<script src="assets/js/supabase-config.js?v=20260830-3" defer><\/script><script src="assets/js/supabase-service.js?v=20260831-email1" defer><\/script><script src="assets/js/data.js?v=20260830-3" defer><\/script><script src="assets/js/app.js?v=20260831-email1" defer><\/script>
+<script src="assets/js/supabase-config.js?v=20260830-3" defer><\/script><script src="assets/js/supabase-service.js?v=20260831-links1" defer><\/script><script src="assets/js/data.js?v=20260831-links1" defer><\/script><script src="assets/js/app.js?v=20260831-links1" defer><\/script>
 </head><body data-section="emac" data-schema="article">
 <a class="skip-link" href="#icerik">İçeriğe geç</a>
 <div class="top-strip"><div class="wrap top-inner"><span>FUTMAC.COM</span><span>E-MAC TURKA FANTAZİ LİGİ</span></div></div>
@@ -90,7 +94,12 @@ for (const article of articles) {
 <footer><div class="wrap footer-inner"><img src="assets/images/logo/emac-turka-transparent.png" alt=""><div><strong>FUTMAC</strong><span>© 2026 E-Mac Turka'nın Spor Gazetesi</span></div><nav><a href="index.html">Ana Sayfa</a></nav></div></footer>
 </body></html>\n`;
   await writeFile(path.join(output, fileName), html, 'utf8');
-  await writeFile(path.join(shareOutput, shareFileName), html, 'utf8');
+  for (const alias of legacyShares) {
+    if (alias.startsWith(article.id + '-') && /^[0-9a-f-]{36}-[a-z0-9]+\.html$/i.test(alias)) {
+      expectedShares.add(alias);
+      await writeFile(path.join(shareOutput, alias), html, 'utf8');
+    }
+  }
 }
 
 for (const entry of await readdir(output, { withFileTypes:true })) {
@@ -107,8 +116,7 @@ const isoDate = value => { const date = new Date(value || Date.now()); return Nu
 const sitemapUrls = staticPages.map((page, index) => ({ url:'https://futmac.com.tr/' + page, lastmod:isoDate(), priority:index === 0 ? '1.0' : '0.7' }));
 for (const author of authors) sitemapUrls.push({ url:'https://futmac.com.tr/yazar.html?id=' + encodeURIComponent(author.slug), lastmod:isoDate(author.updated_at), priority:'0.6' });
 for (const article of articles) {
-  const version = Math.max(0, new Date(article.updated_at || article.published_at || 0).getTime()).toString(36);
-  sitemapUrls.push({ url:'https://futmac.com.tr/paylas/' + article.id + '-' + version + '.html', lastmod:isoDate(article.updated_at || article.published_at), priority:'0.8' });
+  sitemapUrls.push({ url:'https://futmac.com.tr/haber/' + article.id + '.html', lastmod:isoDate(article.updated_at || article.published_at), priority:'0.8' });
 }
 const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + sitemapUrls.map(item => '  <url><loc>' + escape(item.url) + '</loc><lastmod>' + item.lastmod + '</lastmod><priority>' + item.priority + '</priority></url>').join('\n') + '\n</urlset>\n';
 await writeFile(path.join(root, 'sitemap.xml'), sitemap, 'utf8');
