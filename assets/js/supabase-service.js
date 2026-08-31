@@ -256,7 +256,7 @@
     const rows = optionalRows(await client.from('authors').select('*').order('sort_order').order('name').limit(200));
     if (rows === null) return null;
     return rows.map(function (row) {
-      return { id: row.slug, name: row.name, role: row.role, bio: row.bio, image: row.image_url, active: row.is_active, sortOrder: row.sort_order, profile: 'yazar.html?id=' + encodeURIComponent(row.slug) };
+      return { id: row.slug, name: row.name, email: row.email || '', role: row.role, bio: row.bio, image: row.image_url, active: row.is_active, sortOrder: row.sort_order, profile: 'yazar.html?id=' + encodeURIComponent(row.slug) };
     });
   }
 
@@ -355,6 +355,15 @@
   async function saveAuthor(author) {
     const client = await getClient();
     const row = { slug:author.id, name:author.name, role:author.role, bio:author.bio, image_url:author.image, is_active:author.active, sort_order:author.sortOrder };
+    const email = String(author.email || '').trim();
+    if (email && (email.length > 254 || !/^[^\s<>"@]+@[^\s<>"@]+\.[^\s<>"@]+$/.test(email))) throw new Error('Geçerli bir e-posta adresi girin.');
+    const emailSchema = await client.from('authors').select('email').limit(0);
+    if (emailSchema.error) {
+      if (!['42703','PGRST204'].includes(emailSchema.error.code)) throw emailSchema.error;
+      if (email) throw new Error('E-posta alanını etkinleştirmek için 008_author_public_email.sql dosyasını Supabase SQL Editor içinde çalıştırın.');
+    } else {
+      row.email = email;
+    }
     const originalId = author.originalId || editedAuthorOriginalId || author.id;
     if (originalId === author.id) {
       const result = await client.from('authors').upsert(row, { onConflict:'slug' }).select().single();
