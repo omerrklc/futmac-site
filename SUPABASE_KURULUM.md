@@ -20,9 +20,10 @@ where id = (select id from auth.users where email = 'yonetici@example.com');
 9. SQL Editor içinde `supabase/migrations/004_article_ownership.sql` dosyasını çalıştırın. Bu politika editörleri kendi haberleriyle sınırlar; admin bütün haberleri yönetmeye devam eder.
 10. Adminin ana sayfa başlıklarını, duyuru alanlarını ve bölüm görünürlüklerini yönetebilmesi için `supabase/migrations/005_site_control.sql` dosyasını çalıştırın. Bu migration mevcut haber, takım, fikstür veya puan verilerini silmez.
 11. Eski haberlerin yazar kısa kimliğini kalıcı bağlamak ve gizlilik dostu okunma sayacını açmak için `supabase/migrations/006_seo_analytics_and_identity.sql` dosyasını çalıştırın. Başarılı olduktan sonra `assets/js/supabase-config.js` içindeki `analyticsEnabled` değerini `true` yapın.
-10. Authentication > URL Configuration bölümünde `https://futmac.com.tr` adresini Site URL olarak ayarlayın. Redirect URLs listesine `https://futmac.com.tr/sifre-yenile.html` adresini ekleyin. Alan adı DNS ve HTTPS doğrulanana kadar mevcut GitHub Pages parola yenileme adresini de geçici olarak listede tutun.
-10. Site halka açık üyelik kullanmadığı için Authentication ayarlarında **Allow new users to sign up** ve **Allow anonymous sign-ins** seçeneklerini kapatın. Yeni admin/editör hesaplarını yalnızca yetkili kişi Supabase Dashboard içinden oluşturmalıdır.
-11. `admin.html > Ayarlar / Backend > Sistemi ve Yetkileri Kontrol Et` düğmesiyle yeni kullanıcı kaydının ve anonim hesabın kapalı göründüğünü doğrulayın.
+12. Authentication > URL Configuration bölümünde `https://futmac.com.tr` adresini Site URL olarak ayarlayın. Redirect URLs listesine `https://futmac.com.tr/sifre-yenile.html` adresini ekleyin. Alan adı DNS ve HTTPS doğrulanana kadar mevcut GitHub Pages parola yenileme adresini de geçici olarak listede tutun.
+13. SQL Editor içinde `supabase/migrations/010_forum.sql` dosyasını çalıştırın. Bu adım forum konularını, yanıtları, değiştirilebilir rumuzları, anonim görünümü, hız sınırlarını ve moderasyon yetkilerini kurar.
+14. Forum üyeliği için Authentication > Sign In / Providers bölümünde **Allow new users to sign up** seçeneğini açın. **Allow anonymous sign-ins** kapalı kalmalıdır; anonim görünen bir paylaşım yapabilmek için de kayıtlı hesap gerekir. **Confirm email** seçeneğinin açık kalması önerilir.
+15. Forum üyeleri otomatik olarak `viewer` rolü alır ve yönetim paneline giremez. Yeni admin/editör hesaplarını yalnızca yetkili kişi Supabase Dashboard içinden oluşturmalı ve rolünü ayrıca vermelidir.
 
 ## Güvenlik notları
 

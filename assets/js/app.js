@@ -52,11 +52,12 @@
     ['home', 'index.html', 'ANA SAYFA'], ['futbol', 'futbol.html', 'FUTBOL'],
     ['emac', 'emac-ligi.html', 'E-MAC LİGİ'], ['puan', 'puan-durumu.html', 'PUAN DURUMU'],
     ['fikstur', 'fikstur.html', 'FİKSTÜR'], ['fantazi', 'fantazi.html', 'FANTAZİ'],
-    ['transfer', 'transfer.html', 'TRANSFER'], ['yazarlar', 'yazarlar.html', 'YAZARLAR']
+    ['transfer', 'transfer.html', 'TRANSFER'], ['yazarlar', 'yazarlar.html', 'YAZARLAR'], ['forum','forum.html','FORUM']
   ];
   const categoryPages = { futbol:'futbol.html', emac:'emac-ligi.html', fantazi:'fantazi.html', transfer:'transfer.html', yazarlar:'yazarlar.html', macaton:'macaton.html', haftanin11:'haftanin-11i.html', oduller:'oduller.html' };
   const managedCategories = data ? Object.keys(data.categories).filter(function (key) { return data.categories[key].active !== false && data.categories[key].showInMenu; }).sort(function (a,b) { return (data.categories[a].sortOrder||0)-(data.categories[b].sortOrder||0); }) : [];
-  const mainLinks = managedCategories.length ? [['home','index.html','ANA SAYFA']].concat(managedCategories.map(function (key) { return [key, categoryPages[key] || 'kategori.html?kategori=' + encodeURIComponent(key), data.categories[key].title.toUpperCase()]; }), [['puan','puan-durumu.html','PUAN DURUMU'],['fikstur','fikstur.html','FİKSTÜR']]) : defaultMainLinks;
+  const fixedMainLinks = [['puan','puan-durumu.html','PUAN DURUMU'],['fikstur','fikstur.html','FİKSTÜR'],['forum','forum.html','FORUM']];
+  const mainLinks = managedCategories.length ? [['home','index.html','ANA SAYFA']].concat(managedCategories.map(function (key) { return [key, categoryPages[key] || 'kategori.html?kategori=' + encodeURIComponent(key), data.categories[key].title.toUpperCase()]; }), fixedMainLinks) : defaultMainLinks;
   const utilityLinks = [
     ['fikstur', 'fikstur.html', 'FİKSTÜR'], ['puan', 'puan-durumu.html', 'PUAN DURUMU'],
     ['haftanin11', 'haftanin-11i.html', 'HAFTANIN 11’İ'],
@@ -81,7 +82,7 @@
   }
   document.querySelectorAll('.footer-inner nav').forEach(function (footerNav) {
     footerNav.setAttribute('aria-label', 'Alt menü');
-    footerNav.innerHTML = '<a href="index.html">Ana Sayfa</a><a href="fikstur.html">Fikstür</a><a href="puan-durumu.html">Puan Durumu</a><a href="arsiv.html">Arşiv</a><a href="hakkimizda.html">Hakkımızda</a><a href="iletisim.html">İletişim</a><a href="gizlilik.html">Gizlilik</a><a href="kullanim-kosullari.html">Kullanım</a>';
+    footerNav.innerHTML = '<a href="index.html">Ana Sayfa</a><a href="forum.html">Forum</a><a href="fikstur.html">Fikstür</a><a href="puan-durumu.html">Puan Durumu</a><a href="arsiv.html">Arşiv</a><a href="hakkimizda.html">Hakkımızda</a><a href="iletisim.html">İletişim</a><a href="gizlilik.html">Gizlilik</a><a href="kullanim-kosullari.html">Kullanım</a>';
   });
 
   const toggle = document.querySelector('.menu-toggle');

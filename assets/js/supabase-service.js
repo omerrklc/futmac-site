@@ -197,6 +197,23 @@
     return { factors:(factors.data && factors.data.totp) || [], currentLevel:assurance.data.currentLevel, nextLevel:assurance.data.nextLevel };
   }
 
+  async function forumSession() {
+    const client=await getClient(),session=await client.auth.getSession();
+    if(session.error)throw session.error;
+    const user=session.data.session&&session.data.session.user;
+    if(!user)return null;
+    const profile=await client.from('profiles').select('display_name,forum_nickname').eq('id',user.id).single();
+    if(profile.error)throw profile.error;
+    return {user:user,nickname:profile.data.forum_nickname||profile.data.display_name};
+  }
+  async function forumSignUp(email,password,nickname){const client=await getClient();const result=await client.auth.signUp({email:email,password:password,options:{data:{display_name:nickname}}});if(result.error)throw result.error;return result.data;}
+  async function forumSignIn(email,password){const client=await getClient();const result=await client.auth.signInWithPassword({email:email,password:password});if(result.error)throw result.error;return forumSession();}
+  async function forumTopics(){const client=await getClient(),result=await client.rpc('list_forum_topics',{page_size:50,page_offset:0});if(result.error)throw result.error;return result.data||[];}
+  async function forumTopic(id){const client=await getClient(),result=await client.rpc('get_forum_topic',{topic_uuid:id});if(result.error)throw result.error;return result.data||null;}
+  async function forumCreateTopic(title,body,anonymous){const client=await getClient(),result=await client.rpc('create_forum_topic',{topic_title:title,topic_body:body,anonymous:Boolean(anonymous)});if(result.error)throw result.error;return result.data;}
+  async function forumCreateReply(id,body,anonymous){const client=await getClient(),result=await client.rpc('create_forum_reply',{topic_uuid:id,reply_body:body,anonymous:Boolean(anonymous)});if(result.error)throw result.error;return result.data;}
+  async function forumUpdateNickname(nickname){const client=await getClient(),result=await client.rpc('update_forum_nickname',{new_nickname:nickname});if(result.error)throw result.error;return result.data;}
+
   async function enrollTotp() {
     const client = await getClient();
     const result = await client.auth.mfa.enroll({ factorType:'totp', friendlyName:'FUTMAC Yönetim Paneli' });
@@ -556,6 +573,7 @@
   window.FUTMAC_SUPABASE = Object.freeze({
     enabled: enabled(), leagueManagementEnabled: config.leagueManagementEnabled === true,
     getClient: getClient, getSession: getSession, onAuthStateChange: onAuthStateChange, signIn: signIn,
+    forumEnabled:config.forumEnabled===true, forumSession:forumSession, forumSignUp:forumSignUp, forumSignIn:forumSignIn, forumTopics:forumTopics, forumTopic:forumTopic, forumCreateTopic:forumCreateTopic, forumCreateReply:forumCreateReply, forumUpdateNickname:forumUpdateNickname,
     signOut: signOut, requestPasswordReset: requestPasswordReset, updatePassword: updatePassword, getMfaStatus:getMfaStatus, enrollTotp:enrollTotp, verifyTotp:verifyTotp,
     listArticles: listArticles, getPublishedArticle:getPublishedArticle, getShareLink:getShareLink, saveArticle: saveArticle, deleteArticle: deleteArticle, listCategories: listCategories,
     listAuthors: listAuthors, listTeams: listTeams, listStandings: listStandings, listFixtures: listFixtures,

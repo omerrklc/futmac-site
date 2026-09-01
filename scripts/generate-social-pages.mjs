@@ -111,7 +111,7 @@ for (const entry of await readdir(shareOutput, { withFileTypes:true })) {
 for (const entry of await readdir(mediaOutput, { withFileTypes:true })) {
   if (entry.isFile() && !expectedMedia.has(entry.name)) await rm(path.join(mediaOutput, entry.name));
 }
-const staticPages = ['', 'futbol.html', 'emac-ligi.html', 'fantazi.html', 'transfer.html', 'yazarlar.html', 'macaton.html', 'haftanin-11i.html', 'oduller.html', 'fikstur.html', 'puan-durumu.html', 'arsiv.html', 'kurallar.html', 'hakkimizda.html', 'iletisim.html', 'gizlilik.html', 'kullanim-kosullari.html'];
+const staticPages = ['', 'forum.html', 'futbol.html', 'emac-ligi.html', 'fantazi.html', 'transfer.html', 'yazarlar.html', 'macaton.html', 'haftanin-11i.html', 'oduller.html', 'fikstur.html', 'puan-durumu.html', 'arsiv.html', 'kurallar.html', 'hakkimizda.html', 'iletisim.html', 'gizlilik.html', 'kullanim-kosullari.html'];
 const isoDate = value => { const date = new Date(value || Date.now()); return Number.isNaN(date.getTime()) ? new Date().toISOString().slice(0,10) : date.toISOString().slice(0,10); };
 const sitemapUrls = staticPages.map((page, index) => ({ url:'https://futmac.com.tr/' + page, lastmod:isoDate(), priority:index === 0 ? '1.0' : '0.7' }));
 for (const author of authors) sitemapUrls.push({ url:'https://futmac.com.tr/yazar.html?id=' + encodeURIComponent(author.slug), lastmod:isoDate(author.updated_at), priority:'0.6' });
