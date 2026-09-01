@@ -8,7 +8,7 @@
   enabled: true,
   leagueManagementEnabled: true,
   analyticsEnabled: true,
-  forumEnabled: false,
+  forumEnabled: true,
   url: 'https://pwmwymvnyfvrumlizbuw.supabase.co',
     publishableKey: 'sb_publishable_yOZqUUh7u78n7cTFetzWKQ_qn-Oa2mc',
     mediaBucket: 'futmac-media'
