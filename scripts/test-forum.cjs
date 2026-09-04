@@ -40,7 +40,9 @@ const server = http.createServer(async (request, response) => {
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(origin + '/forum.html');
       await page.getByRole('heading', { name:'Son konular' }).waitFor();
-      await page.getByRole('link', { name:'FORUM' }).waitFor();
+      await page.locator('.utility-nav a').first().waitFor();
+      assert.equal(await page.locator('.utility-nav a').first().textContent(), 'FORUM');
+      assert.equal(await page.locator('.utility-nav a').first().isVisible(), true);
       assert.equal(await page.locator('img[src="x"]').count(), 0);
       assert.equal(await page.getByRole('link', { name:/Güvenli konu/ }).count(), 1);
       if (loggedIn) assert.equal(await page.getByRole('heading', { name:'Yeni konu aç' }).count(), 1);

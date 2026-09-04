@@ -59,7 +59,7 @@
   const fixedMainLinks = [['puan','puan-durumu.html','PUAN DURUMU'],['fikstur','fikstur.html','FİKSTÜR'],['forum','forum.html','FORUM']];
   const mainLinks = managedCategories.length ? [['home','index.html','ANA SAYFA']].concat(managedCategories.map(function (key) { return [key, categoryPages[key] || 'kategori.html?kategori=' + encodeURIComponent(key), data.categories[key].title.toUpperCase()]; }), fixedMainLinks) : defaultMainLinks;
   const utilityLinks = [
-    ['fikstur', 'fikstur.html', 'FİKSTÜR'], ['puan', 'puan-durumu.html', 'PUAN DURUMU'],
+    ['forum', 'forum.html', 'FORUM'], ['fikstur', 'fikstur.html', 'FİKSTÜR'], ['puan', 'puan-durumu.html', 'PUAN DURUMU'],
     ['haftanin11', 'haftanin-11i.html', 'HAFTANIN 11’İ'],
     ['macaton', 'macaton.html', 'MACATON'], ['fantazi', 'kurallar.html', 'LİG MEVZUATI'],
     ['oduller', 'oduller.html', 'ÖDÜLLER'], ['arsiv', 'arsiv.html', 'ARŞİV']
