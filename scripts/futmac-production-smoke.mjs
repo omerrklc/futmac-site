@@ -1,6 +1,5 @@
 const DEFAULT_SITE = 'https://futmac.com.tr/';
 const SITE = new URL(process.env.FUTMAC_SITE_URL || DEFAULT_SITE);
-const REQUIRE_CLOSED_SIGNUP = process.env.REQUIRE_CLOSED_SIGNUP === 'true';
 const checks = [];
 const warnings = [];
 
@@ -72,11 +71,13 @@ try {
   await textCheck('Hakkımızda sayfası', new URL('hakkimizda.html', SITE), '<h1>Hakkımızda</h1>');
   await textCheck('İletişim sayfası', new URL('iletisim.html', SITE), '<h1>İletişim</h1>');
   await textCheck('Gizlilik sayfası', new URL('gizlilik.html', SITE), '<h1>Gizlilik ve kişisel veriler</h1>');
+  await textCheck('Forum sayfası', new URL('forum.html', SITE), 'FUTMAC TOPLULUĞU');
   await textCheck('Dinamik haber indeksleme kodu', new URL('assets/js/app.js', SITE), "article.status === 'published' ? 'index,follow'");
 
   const configText = await textCheck('Supabase yapılandırması', new URL('assets/js/supabase-config.js', SITE), 'FUTMAC_SUPABASE_CONFIG');
   const backendUrl = configText.match(/url:\s*'([^']+)'/)?.[1];
   const publishableKey = configText.match(/publishableKey:\s*'([^']+)'/)?.[1];
+  const forumEnabled = /forumEnabled:\s*true/.test(configText);
   record('Supabase adres biçimi', /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(backendUrl || ''), 'Adres doğrulandı');
   record('Publishable anahtar', typeof publishableKey === 'string' && publishableKey.length > 20, 'Genel istemci anahtarı mevcut');
 
@@ -88,9 +89,12 @@ try {
   record('Auth ayarları', settingsResponse.status === 200 && Boolean(settings), 'HTTP ' + settingsResponse.status);
   const signupClosed = settings.disable_signup === true;
   const anonymousClosed = !(settings.external && settings.external.anonymous_users === true);
-  if (!signupClosed) warnings.push('Herkese açık e-posta kaydı açık. Supabase Auth ayarından kapatılmalı.');
   record('Anonim hesaplar kapalı', anonymousClosed, anonymousClosed ? 'Kapalı' : 'Açık');
-  if (REQUIRE_CLOSED_SIGNUP) record('Yeni kullanıcı kaydı kapalı', signupClosed, signupClosed ? 'Kapalı' : 'Açık');
+  record(
+    forumEnabled ? 'Forum üyeliği açık' : 'Yeni kullanıcı kaydı kapalı',
+    forumEnabled ? !signupClosed : signupClosed,
+    signupClosed ? 'Kapalı' : 'Açık'
+  );
 
   const publicTables = [
     ['Kategoriler', 'categories?select=slug&limit=1'],
