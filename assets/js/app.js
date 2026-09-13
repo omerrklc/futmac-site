@@ -362,12 +362,16 @@
     const latest = items.slice(0, 5);
     const predictionList = document.querySelector('[data-daily-predictions]');
     if (predictionList) {
-      const predictions = String(settings.predictionsItemsText || '').split(/\r?\n/).map(function (line) {
+      const predictionGroups=[];let currentGroup=null;
+      String(settings.predictionsItemsText || '').split(/\r?\n/).forEach(function(line){
+        line=line.trim();if(!line)return;
+        if(!line.includes('|')&&line.endsWith(':')){const person=line.slice(0,-1).trim();if(!person)return;currentGroup={person:person,items:[]};predictionGroups.push(currentGroup);return;}
         const parts=line.split('|').map(function(part){return part.trim();});
-        if(parts.length<3||!parts[0]||!parts[1]||!parts[2])return null;
-        return {person:parts[0],match:parts[1],pick:parts[2],odds:parts[3]||''};
-      }).filter(Boolean).slice(0,10);
-      predictionList.innerHTML=predictions.length?predictions.map(function(item){return '<article class="prediction-card"><strong>'+escapeHtml(item.person)+'</strong><span>'+escapeHtml(item.match)+'</span><b>'+escapeHtml(item.pick)+'</b>'+(item.odds?'<em>Oran '+escapeHtml(item.odds)+'</em>':'')+'</article>';}).join(''):'<p>Henüz tahmin eklenmedi.</p>';
+        if(currentGroup&&parts.length>=2&&parts.length<=3&&parts[0]&&parts[1]){currentGroup.items.push({match:parts[0],pick:parts[1],odds:parts[2]||''});return;}
+        if(parts.length>=3&&parts.length<=4&&parts[0]&&parts[1]&&parts[2]){let group=predictionGroups.find(function(item){return item.person===parts[0];});if(!group){group={person:parts[0],items:[]};predictionGroups.push(group);}group.items.push({match:parts[1],pick:parts[2],odds:parts[3]||''});currentGroup=null;}
+      });
+      const groups=predictionGroups.filter(function(group){return group.items.length;}).slice(0,10).map(function(group){group.items=group.items.slice(0,8);return group;});
+      predictionList.innerHTML=groups.length?groups.map(function(group){return '<article class="prediction-group"><header><strong>'+escapeHtml(group.person)+'</strong><small>'+group.items.length+' TAHMİN</small></header><ul>'+group.items.map(function(item){return '<li><span>'+escapeHtml(item.match)+'</span><b>'+escapeHtml(item.pick)+'</b>'+(item.odds?'<em>Oran '+escapeHtml(item.odds)+'</em>':'')+'</li>';}).join('')+'</ul></article>';}).join(''):'<p>Henüz tahmin eklenmedi.</p>';
     }
     const manualBreaking = settings.breakingManual ? parseManualRows(settings.breakingItemsText) : null;
     const ticker = document.querySelector('[data-breaking-ticker]');
