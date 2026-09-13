@@ -133,6 +133,7 @@
     const homeNews = document.querySelector('[data-home-news]'); if (homeNews) homeNews.hidden = settings.mainNewsVisible === false;
     const sectionFor = function (selector) { const child=document.querySelector(selector); return child && child.closest('.portal-widget'); };
     const standings=sectionFor('[data-standings-body][data-compact]');if(standings)standings.hidden=settings.standingsVisible===false;
+    const predictions=document.querySelector('[data-predictions-widget]');if(predictions){predictions.hidden=settings.predictionsVisible===false;const predictionsTitle=predictions.querySelector('[data-predictions-title]');if(predictionsTitle)predictionsTitle.textContent=settings.predictionsTitle||'GÜNÜN TAHMİNLERİ';}
     const upcoming=sectionFor('[data-upcoming-matches]');if(upcoming)upcoming.hidden=settings.upcomingVisible===false;
     const latest=sectionFor('[data-latest-news]');if(latest)latest.hidden=settings.latestVisible===false;
     const recent=sectionFor('[data-recent-news]');if(recent)recent.hidden=settings.recentVisible===false;
@@ -359,6 +360,15 @@
       }).filter(Boolean).slice(0, 20);
     };
     const latest = items.slice(0, 5);
+    const predictionList = document.querySelector('[data-daily-predictions]');
+    if (predictionList) {
+      const predictions = String(settings.predictionsItemsText || '').split(/\r?\n/).map(function (line) {
+        const parts=line.split('|').map(function(part){return part.trim();});
+        if(parts.length<3||!parts[0]||!parts[1]||!parts[2])return null;
+        return {person:parts[0],match:parts[1],pick:parts[2],odds:parts[3]||''};
+      }).filter(Boolean).slice(0,10);
+      predictionList.innerHTML=predictions.length?predictions.map(function(item){return '<article class="prediction-card"><strong>'+escapeHtml(item.person)+'</strong><span>'+escapeHtml(item.match)+'</span><b>'+escapeHtml(item.pick)+'</b>'+(item.odds?'<em>Oran '+escapeHtml(item.odds)+'</em>':'')+'</article>';}).join(''):'<p>Henüz tahmin eklenmedi.</p>';
+    }
     const manualBreaking = settings.breakingManual ? parseManualRows(settings.breakingItemsText) : null;
     const ticker = document.querySelector('[data-breaking-ticker]');
     if (ticker) ticker.innerHTML = manualBreaking ? (manualBreaking.length ? manualBreaking.map(function (item, index) { return (index ? '<i>•</i>' : '') + '<a href="' + escapeHtml(item.url) + '"><span>' + escapeHtml(item.title) + '</span></a>'; }).join('') : '<span>Henüz manuel son dakika eklenmedi.</span>') : (latest.length ? latest.map(function (article, index) { return (index ? '<i>•</i>' : '') + '<a href="' + escapeHtml(article.url) + '"><span>' + escapeHtml(article.title) + '</span></a>'; }).join('') : '<span>Henüz yayımlanmış haber yok.</span>');
