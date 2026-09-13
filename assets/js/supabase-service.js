@@ -49,7 +49,7 @@
     return {
       id: row.id,
       slug: row.slug,
-      type: row.content_type,
+      type: /^gunun-tahminleri-/i.test(row.slug || '') ? 'tahmin' : row.content_type,
       category: row.category_slug,
       title: row.title,
       excerpt: row.excerpt,
@@ -75,7 +75,7 @@
     const publishedAt = new Date(article.date + 'T' + article.time + ':00');
     const row = {
       slug: article.slug,
-      content_type: article.type,
+      content_type: article.type === 'tahmin' ? 'haber' : article.type,
       category_slug: article.category,
       title: article.title,
       excerpt: article.excerpt,

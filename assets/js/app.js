@@ -318,8 +318,8 @@
       return;
     }
     robots.content = article.status === 'published' ? 'index,follow' : 'noindex,nofollow';
-    const paragraphs = String(article.content || '').split(/\n\s*\n/).filter(Boolean).map(function (paragraph, index) { return '<p' + (index === 0 ? ' class="dropcap"' : '') + '>' + escapeHtml(paragraph) + '</p>'; }).join('');
- container.innerHTML = '<nav class="breadcrumb" aria-label="İçerik yolu"><a href="index.html">Ana Sayfa</a><span>›</span><a href="arsiv.html">Arşiv</a><span>›</span><span>İçerik</span></nav><span class="news-kicker">' + escapeHtml(categoryName(article.category).toUpperCase()) + '</span><h1>' + escapeHtml(article.title) + '</h1><p class="dek">' + escapeHtml(article.excerpt) + '</p><div class="article-meta-line"><span><strong>' + escapeHtml(article.author) + '</strong>' + authorEmailMarkup((data.authors || []).find(function (author) { return author.active !== false && author.id === article.authorId; })) + '</span><time datetime="' + escapeHtml(article.date + 'T' + article.time) + '">' + escapeHtml(article.displayDate + ', ' + article.time) + '</time><span>Okuma süresi: ' + escapeHtml(article.readTime) + '</span></div><img class="article-hero" src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"><p class="caption">FUTMAC Haber Merkezi</p>' + paragraphs + '<div class="share-row"><button type="button" data-copy-link>BAĞLANTIYI KOPYALA</button><span class="copy-status" aria-live="polite"></span></div><nav class="story-navigation" aria-label="İçerik bağlantıları"><a href="index.html"><span>‹ ANA SAYFA</span>FUTMAC gündemine dön</a><a href="arsiv.html"><span>ARŞİV ›</span>Bütün içerikler</a></nav>';
+    const paragraphs = article.type==='tahmin'?'<ul class="article-predictions">'+String(article.content||'').split(/\r?\n/).filter(function(line){return line.trim();}).map(function(line){const parts=line.split('|').map(function(part){return part.trim();});return parts.length>=2?'<li><span>'+escapeHtml(parts[0])+'</span><strong>'+escapeHtml(parts[1])+'</strong>'+(parts[2]?'<em>Oran '+escapeHtml(parts.slice(2).join(' | '))+'</em>':'')+'</li>':'<li><span>'+escapeHtml(line.trim())+'</span></li>';}).join('')+'</ul>':String(article.content || '').split(/\n\s*\n/).filter(Boolean).map(function (paragraph, index) { return '<p' + (index === 0 ? ' class="dropcap"' : '') + '>' + escapeHtml(paragraph) + '</p>'; }).join('');
+ container.innerHTML = '<nav class="breadcrumb" aria-label="İçerik yolu"><a href="index.html">Ana Sayfa</a><span>›</span><a href="arsiv.html">Arşiv</a><span>›</span><span>İçerik</span></nav><span class="news-kicker">' + escapeHtml(article.type==='tahmin'?'GÜNÜN TAHMİNLERİ':categoryName(article.category).toUpperCase()) + '</span><h1>' + escapeHtml(article.title) + '</h1><p class="dek">' + escapeHtml(article.excerpt) + '</p><div class="article-meta-line"><span><strong>' + escapeHtml(article.author) + '</strong>' + authorEmailMarkup((data.authors || []).find(function (author) { return author.active !== false && author.id === article.authorId; })) + '</span><time datetime="' + escapeHtml(article.date + 'T' + article.time) + '">' + escapeHtml(article.displayDate + ', ' + article.time) + '</time><span>Okuma süresi: ' + escapeHtml(article.readTime) + '</span></div><img class="article-hero" src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"><p class="caption">FUTMAC Haber Merkezi</p>' + paragraphs + '<div class="share-row"><button type="button" data-copy-link>BAĞLANTIYI KOPYALA</button><span class="copy-status" aria-live="polite"></span></div><nav class="story-navigation" aria-label="İçerik bağlantıları"><a href="index.html"><span>‹ ANA SAYFA</span>FUTMAC gündemine dön</a><a href="arsiv.html"><span>ARŞİV ›</span>Bütün içerikler</a></nav>';
     document.title = article.title + ' | FUTMAC';
     const descriptionTag = document.querySelector('meta[name="description"]'); if (descriptionTag) descriptionTag.content = article.excerpt;
     if (!previewMode && article.status === 'published' && window.FUTMAC_SUPABASE && window.FUTMAC_SUPABASE.trackArticleView) {
@@ -335,19 +335,21 @@
     const homeNews = document.querySelector('[data-home-news]');
     if (!homeNews || !data) return;
     const items = data.articles.filter(function (item) { return item.status === 'published'; });
+    const predictionArticles=items.filter(function(item){return item.type==='tahmin';});
+    const editorialItems=items.filter(function(item){return item.type!=='tahmin';});
     const writerStrip = document.querySelector('.portal-writers');
     if (writerStrip && Array.isArray(data.authors)) {
       writerStrip.querySelectorAll('article').forEach(function (item) { item.remove(); });
       data.authors.filter(function (author) { return author.active !== false; }).forEach(function (author) {
-        const latestArticle = items.find(function (article) { return article.authorId === author.id || article.author === author.name; });
+        const latestArticle = editorialItems.find(function (article) { return article.authorId === author.id || article.author === author.name; });
         writerStrip.insertAdjacentHTML('beforeend','<article><div><strong>'+escapeHtml(author.name)+'</strong><span>'+escapeHtml(author.role || 'YAZAR')+'</span><a href="'+escapeHtml(latestArticle ? latestArticle.url : author.profile || 'yazarlar.html')+'">'+escapeHtml(latestArticle ? latestArticle.title : 'Yazar profili ve yazıları')+'</a></div><img src="'+escapeHtml(author.image)+'" alt="'+escapeHtml(author.name)+'"></article>');
       });
       if (!writerStrip.querySelector('article')) writerStrip.hidden = true;
     }
-    if (!items.length) homeNews.innerHTML = '<div class="state-panel"><strong>Henüz yayımlanmış haber yok.</strong><span>Yönetim panelinden yayımlanan ilk haber burada görünecek.</span></div>';
+    if (!editorialItems.length) homeNews.innerHTML = '<div class="state-panel"><strong>Henüz yayımlanmış haber yok.</strong><span>Yönetim panelinden yayımlanan ilk haber burada görünecek.</span></div>';
     else {
-      const lead = items[0];
-      homeNews.innerHTML = '<article class="portal-main-story"><a href="' + escapeHtml(lead.url) + '"><img src="' + escapeHtml(lead.image) + '" alt="' + escapeHtml(lead.imageAlt || lead.title) + '"></a><div><span>' + escapeHtml(categoryName(lead.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(lead.url) + '">' + escapeHtml(lead.title) + '</a></h2><p>' + escapeHtml(lead.excerpt) + '</p><a class="portal-more" href="' + escapeHtml(lead.url) + '">Haberi oku »</a></div></article>' + items.slice(1).map(function (article) { return '<article class="portal-news"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"><div><span>' + escapeHtml(categoryName(article.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>'; }).join('');
+      const lead = editorialItems[0];
+      homeNews.innerHTML = '<article class="portal-main-story"><a href="' + escapeHtml(lead.url) + '"><img src="' + escapeHtml(lead.image) + '" alt="' + escapeHtml(lead.imageAlt || lead.title) + '"></a><div><span>' + escapeHtml(categoryName(lead.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(lead.url) + '">' + escapeHtml(lead.title) + '</a></h2><p>' + escapeHtml(lead.excerpt) + '</p><a class="portal-more" href="' + escapeHtml(lead.url) + '">Haberi oku »</a></div></article>' + editorialItems.slice(1).map(function (article) { return '<article class="portal-news"><img src="' + escapeHtml(article.image) + '" alt="' + escapeHtml(article.imageAlt || article.title) + '"><div><span>' + escapeHtml(categoryName(article.category).toUpperCase()) + '</span><h2><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></h2><p>' + escapeHtml(article.excerpt) + '</p></div></article>'; }).join('');
     }
     const settings = data.siteSettings || {};
     const parseManualRows = function (text) {
@@ -359,19 +361,10 @@
         return { label:parts[0], title:parts[1], url:url };
       }).filter(Boolean).slice(0, 20);
     };
-    const latest = items.slice(0, 5);
+    const latest = editorialItems.slice(0, 5);
     const predictionList = document.querySelector('[data-daily-predictions]');
     if (predictionList) {
-      const predictionGroups=[];let currentGroup=null;
-      String(settings.predictionsItemsText || '').split(/\r?\n/).forEach(function(line){
-        line=line.trim();if(!line)return;
-        if(!line.includes('|')&&line.endsWith(':')){const person=line.slice(0,-1).trim();if(!person)return;currentGroup={person:person,items:[]};predictionGroups.push(currentGroup);return;}
-        const parts=line.split('|').map(function(part){return part.trim();});
-        if(currentGroup&&parts.length>=2&&parts.length<=3&&parts[0]&&parts[1]){currentGroup.items.push({match:parts[0],pick:parts[1],odds:parts[2]||''});return;}
-        if(parts.length>=3&&parts.length<=4&&parts[0]&&parts[1]&&parts[2]){let group=predictionGroups.find(function(item){return item.person===parts[0];});if(!group){group={person:parts[0],items:[]};predictionGroups.push(group);}group.items.push({match:parts[1],pick:parts[2],odds:parts[3]||''});currentGroup=null;}
-      });
-      const groups=predictionGroups.filter(function(group){return group.items.length;}).slice(0,10).map(function(group){group.items=group.items.slice(0,8);return group;});
-      predictionList.innerHTML=groups.length?groups.map(function(group){return '<article class="prediction-group"><header><strong>'+escapeHtml(group.person)+'</strong><small>'+group.items.length+' TAHMİN</small></header><ul>'+group.items.map(function(item){return '<li><span>'+escapeHtml(item.match)+'</span><b>'+escapeHtml(item.pick)+'</b>'+(item.odds?'<em>Oran '+escapeHtml(item.odds)+'</em>':'')+'</li>';}).join('')+'</ul></article>';}).join(''):'<p>Henüz tahmin eklenmedi.</p>';
+      predictionList.innerHTML=predictionArticles.length?predictionArticles.slice(0,5).map(function(article){return '<article class="prediction-link-card"><a href="'+escapeHtml(article.url)+'"><small>'+escapeHtml(article.displayDate)+' · '+escapeHtml(article.author)+'</small><strong>'+escapeHtml(article.title)+'</strong><span>'+escapeHtml(article.excerpt)+'</span><b>Tahminleri aç »</b></a></article>';}).join(''):'<p>Henüz yayımlanmış tahmin yok.</p>';
     }
     const manualBreaking = settings.breakingManual ? parseManualRows(settings.breakingItemsText) : null;
     const ticker = document.querySelector('[data-breaking-ticker]');
@@ -379,7 +372,7 @@
     const latestList = document.querySelector('[data-latest-news]');
     if (latestList) latestList.innerHTML = manualBreaking ? (manualBreaking.length ? manualBreaking.map(function (item) { return '<li><time>' + escapeHtml(item.label) + '</time><a href="' + escapeHtml(item.url) + '">' + escapeHtml(item.title) + '</a></li>'; }).join('') : '<li>Henüz manuel son dakika eklenmedi.</li>') : (latest.length ? latest.map(function (article) { return '<li><time>' + escapeHtml(article.time || '--:--') + '</time><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a></li>'; }).join('') : '<li>Henüz haber yok.</li>');
     const recentList = document.querySelector('[data-recent-news]');
-    const popular = items.slice().sort(function (a,b) { return (b.viewCount || 0) - (a.viewCount || 0) || String(b.date+b.time).localeCompare(String(a.date+a.time)); }).slice(0,5);
+    const popular = editorialItems.slice().sort(function (a,b) { return (b.viewCount || 0) - (a.viewCount || 0) || String(b.date+b.time).localeCompare(String(a.date+a.time)); }).slice(0,5);
     if (recentList) recentList.innerHTML = popular.length ? popular.map(function (article) { return '<li><a href="' + escapeHtml(article.url) + '">' + escapeHtml(article.title) + '</a>'+(article.viewCount?'<small>'+escapeHtml(article.viewCount.toLocaleString('tr-TR'))+' okunma</small>':'')+'</li>'; }).join('') : '<li>Henüz haber yok.</li>';
     const fixtureList = document.querySelector('[data-upcoming-matches]');
     if (fixtureList) {
