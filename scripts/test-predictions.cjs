@@ -33,12 +33,17 @@ const server = http.createServer(async (request, response) => {
     assert.equal(await page.locator('.prediction-link-card a').getAttribute('href'), 'haber-onizleme.html?id=1');
     assert.equal(await page.getByText('Ayşe’nin Günün Tahminleri', { exact:true }).count(), 1);
     assert.equal(await page.locator('[data-home-news]').getByText('Ayşe’nin Günün Tahminleri').count(), 0);
+    assert.equal(await page.locator('.predictions-archive-link').getAttribute('href'), 'arsiv.html?tur=tahmin');
     assert.equal(await page.getByText(/18\+/).count(), 1);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
     await page.locator('.prediction-link-card a').click();
     await page.locator('.article-predictions').waitFor();
     assert.equal(await page.locator('.article-predictions li').count(), 2);
     assert.equal(await page.getByText('Oran 1.75', { exact:true }).count(), 1);
+    await page.goto('http://127.0.0.1:' + server.address().port + '/arsiv.html?tur=tahmin');
+    await page.getByRole('heading', { name:'GÜNÜN TAHMİNLERİ ARŞİVİ' }).waitFor();
+    assert.equal(await page.locator('[data-archive-results] .news-row').count(), 1);
+    assert.equal(await page.locator('[data-archive-results]').getByText('Normal haber').count(), 0);
     assert.deepEqual(errors, []);
     console.log('PASS daily predictions mobile and escaping');
     await context.close();

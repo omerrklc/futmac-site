@@ -201,6 +201,8 @@
     const status = document.querySelector('[data-archive-status]');
     const pagination = document.querySelector('[data-archive-pagination]');
     const params = new URLSearchParams(window.location.search);
+    const predictionArchive=params.get('tur')==='tahmin';
+    if(predictionArchive){const archiveHeader=document.querySelector('.archive-header');if(archiveHeader){const kicker=archiveHeader.querySelector('span'),title=archiveHeader.querySelector('h1'),description=archiveHeader.querySelector('p');if(kicker)kicker.textContent='FUTMAC TAHMİNLERİ';if(title)title.textContent='GÜNÜN TAHMİNLERİ ARŞİVİ';if(description)description.textContent='Yayımlanmış günün tahminlerini tarih ve tahminciye göre inceleyin.';}document.title='Günün Tahminleri Arşivi | FUTMAC';const topLabel=document.querySelector('.top-inner span:last-child');if(topLabel)topLabel.textContent='TAHMİN ARŞİVİ';const searchLabel=document.querySelector('label[for="archive-search"]');if(searchLabel)searchLabel.textContent='TAHMİNLERDE ARA';search.placeholder='Başlık, tahminci veya kelime';}
     const authorOptions = new Map();
     (data.authors || []).filter(function (item) { return item.active !== false; }).forEach(function (item) { authorOptions.set(item.id, item.name); });
     data.articles.forEach(function (item) { if (item.author && !item.authorId) authorOptions.set(item.author, item.author); });
@@ -211,7 +213,7 @@
     function selectedItems() {
       const query = search.value.toLocaleLowerCase('tr-TR').trim();
       return data.articles.filter(function (item) {
-        return (!query || (item.title + ' ' + item.excerpt + ' ' + item.author).toLocaleLowerCase('tr-TR').includes(query)) &&
+        return item.status==='published'&&(!predictionArchive||item.type==='tahmin')&&(!query || (item.title + ' ' + item.excerpt + ' ' + item.author).toLocaleLowerCase('tr-TR').includes(query)) &&
           (category.value === 'all' || item.category === category.value) &&
           (author.value === 'all' || item.authorId === author.value || item.author === author.value) &&
           (month.value === 'all' || item.date.slice(0, 7) === month.value);
@@ -219,6 +221,7 @@
     }
     function updateUrl() {
       const next = new URLSearchParams();
+      if(predictionArchive)next.set('tur','tahmin');
       if (search.value) next.set('q', search.value); if (category.value !== 'all') next.set('kategori', category.value); if (author.value !== 'all') next.set('yazar', author.value); if (month.value !== 'all') next.set('ay', month.value); if (currentPage > 1) next.set('sayfa', String(currentPage));
       if (window.location.protocol !== 'file:') window.history.replaceState({}, '', window.location.pathname + (next.toString() ? '?' + next.toString() : '') + window.location.hash);
     }
